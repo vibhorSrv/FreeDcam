@@ -7,6 +7,14 @@
 #include <android/log.h>
 #include "../tiff/libtiff/tiffio.h"
 #include "DngTags.h"
+#include "dngstack.h"
+#include "HalideBuffer.h"
+#include "libraw.h"
+#include "DngProfile.h"
+#include "CustomMatrix.h"
+#include "DngWriter.h"
+#include <string>
+
 #define  LOG_TAG    "freedcam.RawToDngNative"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 
@@ -25,259 +33,183 @@ void moveToMem(float * in, float *out, int count)
     }
 }
 
+void copyMatrix(float* dest, float colormatrix[4][3])
+{
+    int m = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int t = 0; t < 3; t++)
+        {
+            dest[m++] = colormatrix[i][t];
+        }
+    }
+}
+void copyMatrix(float* dest, float colormatrix[3][4])
+{
+    int m = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        for (int t = 0; t < 3; t++)
+        {
+            dest[m++] = colormatrix[i][t];
+        }
+    }
+}
+
+void copyMatrix(float* dest, float colormatrix[4])
+{
+    int m = 0;
+    for (int i = 0; i < 3; i++)
+    {
+        dest[m++] = colormatrix[i];
+    }
+}
+
 
 JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile)
 {
+
+
+
     int stringCount = (*env).GetArrayLength(filesToStack);
     int width,height, outputcount;
     const char * files[stringCount];
     const char * outfile =(*env).GetStringUTFChars( outputfile, NULL);
-    unsigned short tmpPixel, bitdeep,bitdeeptemp;
-    unsigned char * rawOutputData;
-    unsigned char* cfa= new unsigned char[4];
-    unsigned char* cfatmp= new unsigned char[4];
-    float* cmat1 = new float[9];
-    float * cmat2 = new float[9];
-    float * neutMat = new float[3];
-    float * fmat1= new float[9];
-    float * fmat2= new float[9];
-    float * calib1= new float[9];
-    float * calib2= new float[9];
-    double *noisemat  = new double[6];
-    float *blackleveltmp;
-    short blacklevel;
-    float * tmpmat;
-    double * tmpdouble;
-    long * whitelvl;
-    long white;
 
-    //short * whitelvltmp;
-    //short whitelvl;
-    unsigned char * inbuf;
-    /*unsigned char * opcodetmp;
-    unsigned char * opcode2;
-    unsigned char * opcode3;*/
     LOGD("FilesToReadCount: %i", stringCount);
     for (int i=0; i<stringCount; i++) {
         jstring string = (jstring) (*env).GetObjectArrayElement(filesToStack, i);
         files[i] = (*env).GetStringUTFChars( string, NULL);
     }
 
-    _XTIFFInitialize();
 
-    TIFF *tif=TIFFOpen(files[0], "rw");
-    //read needed dng tags
-    TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, &width);
-    LOGD("GetWidth");
-    TIFFGetField(tif, TIFFTAG_IMAGELENGTH, &height);
-    LOGD("GetHeight");
-    TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bitdeeptemp);
-    LOGD("GetBitDeep");
-    bitdeep = bitdeeptemp;
-    TIFFGetField(tif, TIFFTAG_COLORMATRIX1, &tmpmat);
-    LOGD("cc1");
-    moveToMem(tmpmat, cmat1,9);
-    TIFFGetField(tif, TIFFTAG_COLORMATRIX2, &tmpmat);
-    LOGD("cc2");
-    moveToMem(tmpmat, cmat2,9);
-    TIFFGetField(tif, TIFFTAG_ASSHOTNEUTRAL, &tmpmat);
-    LOGD("neutral");
-    moveToMem(tmpmat, neutMat,3);
-    TIFFGetField(tif, TIFFTAG_FOWARDMATRIX1, &tmpmat);
-    moveToMem(tmpmat, fmat1,9);
-    TIFFGetField(tif, TIFFTAG_FOWARDMATRIX2, &tmpmat);
-    moveToMem(tmpmat, fmat2,9);
-    TIFFGetField(tif, TIFFTAG_CAMERACALIBRATION1, &tmpmat);
-    moveToMem(tmpmat, calib1,9);
-    TIFFGetField(tif, TIFFTAG_CAMERACALIBRATION2, &tmpmat);
-    moveToMem(tmpmat, calib2,9);
-    TIFFGetField(tif, TIFFTAG_NOISEPROFILE, &tmpdouble);
-    for (int i = 0; i < 6; ++i) {
-        noisemat[i] = tmpdouble[i];
-    }
-    TIFFGetField(tif, TIFFTAG_CFAPATTERN, &cfatmp);
-    for (int i = 0; i < 4; ++i) {
-        cfa[i] = cfatmp[i];
-    }
-    LOGD("cfa pattern %c%c&c&c", cfa[0],cfa[1],cfa[2],cfa[3]);
+    LOGD("init libraw");
+    LibRaw raw;
+    int ret;
+    raw.imgdata.params.no_auto_bright = 0; //-W
+    raw.imgdata.params.use_camera_wb = 1;
+    raw.imgdata.params.output_bps = 16; // -6
+    raw.imgdata.params.output_color = 0;
+    //raw.imgdata.params.user_qual = 0;
+    //raw.imgdata.params.half_size = 1;
+    raw.imgdata.params.no_auto_scale = 0;
+    raw.imgdata.params.gamm[0] = 1.0; //-g 1 1
+    raw.imgdata.params.gamm[1] = 1.0; //-g 1 1
+    raw.imgdata.params.output_tiff = 0;
+    raw.imgdata.params.no_interpolation = 1;
+    if ((ret = raw.open_file(files[0]) != LIBRAW_SUCCESS))
+        return;
+    LOGD("open raw");
+    if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
+        return;
+    LOGD("open unpack");
+    width = (int)raw.imgdata.sizes.raw_width;
+    height = (int)raw.imgdata.sizes.raw_height;
+    DngProfile * dngprofile =new DngProfile();
+    CustomMatrix * matrix = new CustomMatrix();
+    Halide::Runtime::Buffer<uint16_t> input(width, height, 2);
+    Halide::Runtime::Buffer<uint16_t> output(width, height, 1);
 
-    TIFFGetField(tif, TIFFTAG_WHITELEVEL, &whitelvl);
-    LOGD("whitelvl:%i" , whitelvl[0]);
-    white = whitelvl[0];
-    LOGD("whitelvl:%i" , white);
-    //whitelvl = whitelvltmp[0];
-    TIFFGetField(tif, TIFFTAG_BLACKLEVEL, &blackleveltmp);
-    /*TIFFGetField(tif, TIFFTAG_OPC2, &opcodetmp);
-    opcode2 = opcodetmp;
-    TIFFGetField(tif, TIFFTAG_OPC3, &opcodetmp);
-    opcode3 = opcodetmp;*/
-    blacklevel = blackleveltmp[0];
-
-    rawOutputData = new unsigned char[((width*height)*16)/8];
-
-    int scanlinesize = TIFFStripSize(tif);
-    inbuf = (unsigned char*)_TIFFmalloc(scanlinesize);
-    outputcount = 0;
-    for (int row = 0; row < height; row++)
+    uint16_t * data = input.data();
+    uint16_t * out = output.data();
+    for (size_t i = 0; i <  width *  height; i++)
     {
-        TIFFReadRawStrip(tif,row, inbuf, scanlinesize);
-        if(bitdeep == 10)
-        {
-            for (int i = 0; i < scanlinesize; i+=5) {
-                tmpPixel = (inbuf[i] << 2 | (inbuf[i+1] & 0b11000000) >> 6); //11111111 11
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-
-                tmpPixel = ((inbuf[i+1] & 0b00111111 ) << 4 | (inbuf[i+2] & 0b11110000) >> 4); // 222222 2222
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-
-                tmpPixel = ((inbuf[i+2]& 0b00001111 ) << 6 | (inbuf[i+3] & 0b11111100) >> 2); // 3333 333333
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-
-                tmpPixel = ((inbuf[i+3]& 0b00000011 ) << 8 | inbuf[i+4]); // 44 44444444
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-            }
-        }
-        else if(bitdeep == 16)
-        {
-            for (int i = 0; i < scanlinesize; i+=8) {
-                tmpPixel = (inbuf[i] | inbuf[i+1]<<8);
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-
-                tmpPixel = (inbuf[i+2] | inbuf[i+3]<<8);
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-
-                tmpPixel = (inbuf[i+4] | inbuf[i+5]<<8);
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-
-                tmpPixel = (inbuf[i+6] | inbuf[i+7]<<8);
-                rawOutputData[outputcount++] = tmpPixel & 0xff;
-                rawOutputData[outputcount++] = tmpPixel >>8;
-            }
-        }
+        data[i] = (raw.imgdata.rawdata.raw_image[i] << 2);
     }
-    TIFFClose(tif);
 
+    float* bl = new float[4];
+    for (size_t i = 0; i < 4; i++)
+    {
+        bl[i] = raw.imgdata.color.dng_levels.dng_cblack[6];
+    }
+    dngprofile->blacklevel = bl;
+    dngprofile->whitelevel = raw.imgdata.color.dng_levels.dng_whitelevel[0];
+    dngprofile->rawwidht = width;
+    dngprofile->rawheight = height;
+    dngprofile->rowSize = 0;
+
+    char cfaar[4];
+    cfaar[0] = raw.imgdata.idata.cdesc[raw.COLOR(0, 0)];
+    cfaar[1] = raw.imgdata.idata.cdesc[raw.COLOR(0, 1)];
+    cfaar[2] = raw.imgdata.idata.cdesc[raw.COLOR(1, 0)];
+    cfaar[3] = raw.imgdata.idata.cdesc[raw.COLOR(1, 1)];
+
+    std::string cfa = cfaar;
+    if (cfa == std::string("BGGR"))
+    {
+        dngprofile->bayerformat = "bggr";
+    }
+    else if (cfa == std::string("RGGB"))
+    {
+        dngprofile->bayerformat = "rggb";
+    }
+    else if (cfa == std::string("GRBG"))
+    {
+        dngprofile->bayerformat = "grbg";
+    }
+    else
+    {
+        dngprofile->bayerformat = "gbrg";
+    }
+
+    dngprofile->rawType = 6;
+
+    matrix->colorMatrix1 = new float[9];
+    matrix->colorMatrix2 = new float[9];
+    matrix->neutralColorMatrix = new float[3];
+    matrix->fowardMatrix1 = new float[9];
+    matrix->fowardMatrix2 = new float[9];
+    matrix->reductionMatrix1 = new float[9];
+    matrix->reductionMatrix2 = new float[9];
+
+    copyMatrix(matrix->colorMatrix1, raw.imgdata.color.dng_color[0].colormatrix);
+    copyMatrix(matrix->colorMatrix2, raw.imgdata.color.dng_color[1].colormatrix);
+    copyMatrix(matrix->neutralColorMatrix, raw.imgdata.color.cam_mul);
+    copyMatrix(matrix->fowardMatrix1, raw.imgdata.color.dng_color[0].forwardmatrix);
+    copyMatrix(matrix->fowardMatrix2, raw.imgdata.color.dng_color[1].forwardmatrix);
+    copyMatrix(matrix->reductionMatrix1, raw.imgdata.color.dng_color[0].calibration);
+    copyMatrix(matrix->reductionMatrix2, raw.imgdata.color.dng_color[1].calibration);
+
+    LOGD("data copied");
+    raw.recycle();
+    int offsetNextImg = width*height;
     //read left dngs and merge them
     for (int i = 1; i < stringCount; ++i) {
-        TIFF *tif=TIFFOpen(files[i], "rw");
-        TIFFGetField(tif, TIFFTAG_BITSPERSAMPLE, &bitdeeptemp);
-        bitdeep = bitdeeptemp;
-        outputcount = 0;
-        for (int row = 0; row < height; row++)
+
+        if ((ret = raw.open_file(files[i]) != LIBRAW_SUCCESS))
+            return;
+        if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
+            return;
+        LOGD("open second");
+        for (size_t i = 0; i <  offsetNextImg; i++)
         {
-            TIFFReadRawStrip(tif,row, inbuf, scanlinesize);
-            if(bitdeep == 10)
-            {
-                for (int i = 0; i < scanlinesize; i+=5) {
-                    tmpPixel = (((inbuf[i] << 2 | (inbuf[i+1] & 0b11000000) >> 6)) + (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2; //11111111 11
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-
-                    tmpPixel = ((((inbuf[i+1] & 0b00111111 ) << 4 | (inbuf[i+2] & 0b11110000) >> 4)) + (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2; // 222222 2222
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-
-                    tmpPixel = ((((inbuf[i+2]& 0b00001111 )  | (inbuf[i+3] & 0b11111100) >> 2)) + (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2; // 3333 333333
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-
-                    tmpPixel = ((((inbuf[i+3]& 0b00000011 ) << 8 | inbuf[i+4])) + (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2; // 44 44444444
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-                }
-            }
-            else if(bitdeep == 16)
-            {
-                for (int i = 0; i < scanlinesize; i+=8) {
-                    tmpPixel = (((inbuf[i] | inbuf[i+1]<<8))+ (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2;
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-
-                    tmpPixel = (((inbuf[i+2] | inbuf[i+3]<<8))+ (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2;
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-
-                    tmpPixel = (((inbuf[i+4] | inbuf[i+5]<<8))+ (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2;
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-
-                    tmpPixel = (((inbuf[i+6] | inbuf[i+7]<<8))+ (rawOutputData[outputcount] | rawOutputData[outputcount+1]<<8))/2;
-                    rawOutputData[outputcount++] = tmpPixel & 0xff;
-                    rawOutputData[outputcount++] = tmpPixel >>8;
-                }
-            }
+            data[i+offsetNextImg] = (raw.imgdata.rawdata.raw_image[i] << 2);
         }
-        TIFFClose(tif);
+        LOGD("unpack second");
+        raw.recycle();
+        LOGD("startstack");
+        dngstack(input,output);
+        LOGD("stackdone");
+        for (size_t i = 0; i <  offsetNextImg; i++)
+        {
+            data[i] = out[i];
+        }
     }
-    free(inbuf);
-    //create stacked dng
-    tif=TIFFOpen(outfile, "w");
 
-    TIFFSetField (tif, TIFFTAG_SUBFILETYPE, 0);
-    TIFFSetField(tif, TIFFTAG_IMAGEWIDTH, width);
-    TIFFSetField(tif, TIFFTAG_IMAGELENGTH, height);
-    TIFFSetField(tif, TIFFTAG_BITSPERSAMPLE, 16);
-    TIFFSetField(tif, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_CFA);
-    TIFFSetField(tif, TIFFTAG_COMPRESSION, COMPRESSION_NONE);
-    TIFFSetField (tif, TIFFTAG_SAMPLESPERPIXEL, 1);
-    TIFFSetField(tif, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
-    TIFFSetField(tif, TIFFTAG_DNGVERSION, "\001\003\0\0");
-    TIFFSetField(tif, TIFFTAG_DNGBACKWARDVERSION, "\001\001\0\0");
-    TIFFSetField(tif, TIFFTAG_COLORMATRIX1, 9, cmat1);
-    LOGD("colormatrix1");
-    TIFFSetField(tif, TIFFTAG_COLORMATRIX2, 9, cmat2);
-    TIFFSetField(tif, TIFFTAG_ASSHOTNEUTRAL, 3, neutMat);
-    LOGD("neutralMatrix");
-    if(fmat1 != NULL)
-        TIFFSetField(tif, TIFFTAG_FOWARDMATRIX1, 9,  fmat1);
-    if(fmat2 != NULL)
-        TIFFSetField(tif, TIFFTAG_FOWARDMATRIX2, 9,  fmat2);
-    if(calib1 != NULL)
-        TIFFSetField(tif, TIFFTAG_CAMERACALIBRATION1, 9,  calib1);
-    if(calib2 != NULL)
-        TIFFSetField(tif, TIFFTAG_CAMERACALIBRATION2, 9,  calib2);
-    if(noisemat != NULL)
-        TIFFSetField(tif, TIFFTAG_NOISEPROFILE, 6,  noisemat);
-    TIFFSetField(tif, TIFFTAG_CALIBRATIONILLUMINANT1, 17);
-    TIFFSetField(tif, TIFFTAG_CALIBRATIONILLUMINANT2, 21);
+    unsigned char *data1 = (unsigned char *)out;
+    unsigned data_size = width * height * 2;
 
-    TIFFSetField(tif, TIFFTAG_ORIENTATION, ORIENTATION_TOPLEFT);
+    DngWriter *dngw = new DngWriter();
 
-    TIFFSetField (tif, TIFFTAG_CFAPATTERN, cfa);
-    LOGD("whitelvl:%i" , white);
-    TIFFSetField (tif, TIFFTAG_WHITELEVEL,1, &white);
+    dngw->dngProfile = dngprofile;
+    dngw->customMatrix = matrix;
+    dngw->bayerBytes = data1;
+    dngw->rawSize = data_size;
+    dngw->fileSavePath = (char*)outfile;
+    dngw->_make = "hdr+";
+    dngw->_model = "model";
 
-    short CFARepeatPatternDim[] = { 2,2 };
-    TIFFSetField (tif, TIFFTAG_CFAREPEATPATTERNDIM, CFARepeatPatternDim);
-    int bl = blacklevel;
-    float *blacklevelar = new float[4];
-    for (int i = 0; i < 4; ++i) {
-        blacklevelar[i] = bl;
-    }
-    TIFFSetField (tif, TIFFTAG_BLACKLEVEL, 4, blacklevelar);
-    LOGD("wrote blacklevel");
-    TIFFSetField (tif, TIFFTAG_BLACKLEVELREPEATDIM, CFARepeatPatternDim);
+    dngw->WriteDNG();
 
-    //TODO find out why OPCODE cause ueof ex in ps
-    /*if(sizeof(opcode2)>0)
-        TIFFSetField(tif,TIFFTAG_OPC2, sizeof(opcode2), opcode2);
-    if(sizeof(opcode3)>0)
-        TIFFSetField(tif,TIFFTAG_OPC3, sizeof(opcode3), opcode3);*/
-    TIFFCheckpointDirectory(tif);
 
-    TIFFWriteRawStrip(tif, 0, rawOutputData, ((width*height)*16)/8);
-
-    TIFFRewriteDirectory(tif);
-
-    //TIFFWriteRawStrip(tif, 0, rawOutputData, width*height);
-
-    TIFFClose(tif);
-    delete[] rawOutputData;
 }

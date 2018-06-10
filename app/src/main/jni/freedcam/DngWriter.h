@@ -38,13 +38,13 @@ private:
     void process16to12(TIFF *tif);
     void writeRawStuff(TIFF *tif);
 public:
-    ExifInfo *exifInfo;
+    ExifInfo *exifInfo = NULL;
     GpsInfo *gpsInfo;
     DngProfile * dngProfile;
     CustomMatrix * customMatrix;
-    char* _make;
-    char*_model;
-    char* _dateTime;
+    char* _make = NULL;
+    char*_model = NULL;
+    char* _dateTime = NULL;
 
     long rawSize;
 
