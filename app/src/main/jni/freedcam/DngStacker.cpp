@@ -107,15 +107,17 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     height = (int)raw.imgdata.sizes.raw_height;
     DngProfile * dngprofile =new DngProfile();
     CustomMatrix * matrix = new CustomMatrix();
-    Halide::Runtime::Buffer<uint16_t> input(width, height, 2);
+    Halide::Runtime::Buffer<uint16_t> input(width, height, stringCount);
     Halide::Runtime::Buffer<uint16_t> output(width, height, 1);
 
     uint16_t * data = input.data();
     uint16_t * out = output.data();
+    int offsetNextImg = width*height;
     for (size_t i = 0; i <  width *  height; i++)
     {
-        data[i] = (raw.imgdata.rawdata.raw_image[i] << 2);
+        data[i] = (raw.imgdata.rawdata.raw_image[i]);
     }
+    data += offsetNextImg;
 
     float* bl = new float[4];
     for (size_t i = 0; i < 4; i++)
@@ -172,7 +174,7 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
 
     LOGD("data copied");
     raw.recycle();
-    int offsetNextImg = width*height;
+
     //read left dngs and merge them
     for (int i = 1; i < stringCount; ++i) {
 
@@ -180,21 +182,19 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
             return;
         if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
             return;
-        LOGD("open second");
-        for (size_t i = 0; i <  offsetNextImg; i++)
+        LOGD("open %i", i);
+        for (size_t t = 0; t <  offsetNextImg; t++)
         {
-            data[i+offsetNextImg] = (raw.imgdata.rawdata.raw_image[i] << 2);
+            int off = i * offsetNextImg;
+            data[t+ off] = (raw.imgdata.rawdata.raw_image[t]);
         }
-        LOGD("unpack second");
+        //data += offsetNextImg;
+        LOGD("unpack %i", i);
         raw.recycle();
-        LOGD("startstack");
-        dngstack(input,output);
-        LOGD("stackdone");
-        for (size_t i = 0; i <  offsetNextImg; i++)
-        {
-            data[i] = out[i];
-        }
     }
+    LOGD("startstack");
+    dngstack(input,stringCount,output);
+    LOGD("stackdone");
 
     unsigned char *data1 = (unsigned char *)out;
     unsigned data_size = width * height * 2;
