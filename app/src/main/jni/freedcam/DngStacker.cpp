@@ -7,20 +7,20 @@
 #include <android/log.h>
 #include "../tiff/libtiff/tiffio.h"
 #include "DngTags.h"
-#include "dngstack.h"
-#include "HalideBuffer.h"
 #include "libraw.h"
 #include "DngProfile.h"
 #include "CustomMatrix.h"
 #include "DngWriter.h"
 #include <string>
+#include "mergstacka.h"
+#include "HalideBuffer.h"
 
 #define  LOG_TAG    "freedcam.RawToDngNative"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 
 extern "C"
 {
-    JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile);
+JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile);
 }
 
 
@@ -107,17 +107,21 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     height = (int)raw.imgdata.sizes.raw_height;
     DngProfile * dngprofile =new DngProfile();
     CustomMatrix * matrix = new CustomMatrix();
-    Halide::Runtime::Buffer<uint16_t> input(width, height, stringCount);
+    Halide::Runtime::Buffer<uint16_t> input(width, height, 2);
+    Halide::Runtime::Buffer<uint16_t> input_to_merge(width, height, 2);
+
     Halide::Runtime::Buffer<uint16_t> output(width, height, 1);
 
-    uint16_t * data = input.data();
+    uint16_t * inputdata = input.data();
+    uint16_t * input_to_mergedata = input_to_merge.data();
     uint16_t * out = output.data();
     int offsetNextImg = width*height;
     for (size_t i = 0; i <  width *  height; i++)
     {
-        data[i] = (raw.imgdata.rawdata.raw_image[i]);
+        inputdata[i] = (raw.imgdata.rawdata.raw_image[i]);
+        input_to_mergedata[i] = (raw.imgdata.rawdata.raw_image[i]);
     }
-    data += offsetNextImg;
+    //inputdata += offsetNextImg;
 
     float* bl = new float[4];
     for (size_t i = 0; i < 4; i++)
@@ -183,18 +187,24 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
         if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
             return;
         LOGD("open %i", i);
+        int off = offsetNextImg;
         for (size_t t = 0; t <  offsetNextImg; t++)
         {
-            int off = i * offsetNextImg;
-            data[t+ off] = (raw.imgdata.rawdata.raw_image[t]);
+            inputdata[t+ off] = raw.imgdata.rawdata.raw_image[t];
+            input_to_mergedata[t+ off] = raw.imgdata.rawdata.raw_image[t];
         }
-        //data += offsetNextImg;
-        LOGD("unpack %i", i);
         raw.recycle();
+
+        LOGD("end copy algin to alignout");
+        LOGD("start merge");
+        mergstacka(input,input_to_merge,output);
+        LOGD("end merge");
+        for (size_t t = 0; t <  offsetNextImg; t++)
+        {
+            input_to_mergedata[t] = out[t];
+        }
+
     }
-    LOGD("startstack");
-    dngstack(input,stringCount,output);
-    LOGD("stackdone");
 
     unsigned char *data1 = (unsigned char *)out;
     unsigned data_size = width * height * 2;
