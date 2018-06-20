@@ -316,7 +316,6 @@ void DngWriter::processTight(TIFF *tif) {
     {
         LOGD("Free Buffer");
         free(buffer);
-        buffer = NULL;
         LOGD("Freed Buffer");
     }
     LOGD("Mem Released");
@@ -397,7 +396,6 @@ void DngWriter::process12tight(TIFF *tif) {
     TIFFWriteRawStrip(tif, 0, out, dngProfile->rawheight*shouldberowsize);
     LOGD("Finalizng DNG");
     delete[] out;
-    out = NULL;
 }
 
 void DngWriter::processLoose(TIFF *tif) {
@@ -447,7 +445,6 @@ void DngWriter::processLoose(TIFF *tif) {
     {
         LOGD("Free Buffer");
         free(buffer);
-        buffer = NULL;
         LOGD("Freed Buffer");
     }
 
@@ -476,6 +473,7 @@ void DngWriter::processSXXX16(TIFF *tif) {
             LOGD("Error writing TIFF scanline.");
         }
     }
+
     LOGD("Finalizng DNG");
     LOGD("Free Memory");
 
@@ -714,6 +712,43 @@ void DngWriter::WriteDNG() {
     TIFFWriteDirectory(tif);
     TIFFClose(tif);
 
-
+    LOGD("delete Opcode2");
+    if(opcode2 != NULL)
+    {
+        delete[] opcode2;
+        opcode2Size = NULL;
+        opcode2 = NULL;
+    }
+    LOGD("delete Opcode3");
+    if(opcode3 != NULL)
+    {
+        delete[] opcode3;
+        opcode2Size = NULL;
+        opcode3 = NULL;
+    }
+    LOGD("delete bayerbytes");
+    if (bayerBytes != NULL){
+        delete [] bayerBytes;
+        rawSize = NULL;
+        bayerBytes = NULL;
+    }
+    LOGD("delete filesavepath");
+    if(fileSavePath != NULL)
+    {
+        delete[] fileSavePath;
+        fileSavePath = NULL;
+    }
+    LOGD("delete exif");
+    if(exifInfo != NULL)
+        exifInfo = NULL;
+    LOGD("delete dngprofile");
+    if(dngProfile != NULL)
+        dngProfile = NULL;
+    LOGD("delete customMatrix");
+    if(customMatrix != NULL)
+        customMatrix = NULL;
+    fileDes = NULL;
+    thumbheight = NULL;
+    thumwidth = NULL;
     LOGD("DONE");
 }
