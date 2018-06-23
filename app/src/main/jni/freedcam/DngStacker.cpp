@@ -221,5 +221,13 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
 
     dngw->WriteDNG();
 
+    delete matrix;
+    delete dngprofile;
+    delete[] data1;
+    delete outfile;
+    delete input;
+    delete input_to_merge;
+    delete output;
+
 
 }
