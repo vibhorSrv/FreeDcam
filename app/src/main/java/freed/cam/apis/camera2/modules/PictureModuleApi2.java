@@ -68,8 +68,8 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
     private String picFormat;
     private int jpeg_width;
     private int jpeg_height;
-    private int raw_width;
-    private int raw_height;
+    protected int raw_width;
+    protected int raw_height;
     private int raw_format;
     protected ImageReader jpegReader;
     protected ImageReader rawReader;

@@ -45,13 +45,13 @@ public:
         LOGD("init output");
         Halide::Runtime::Buffer<uint16_t> tmp3(width, height, 1);
         output = tmp3;
-        inputdata = (uint16_t*) input.data();
-        mergedata = (uint16_t*)input_to_merge.data();
-        outdata =(uint16_t*) output.data();
+        inputdata = input.data();
+        mergedata = input_to_merge.data();
+        outdata = output.data();
         LOGD("copy data");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i] = firstdata[i];
-            mergedata[i] = firstdata[i];
+            inputdata[i] = ((firstdata[i])<<2);
+            mergedata[i] = ((firstdata[i])<<2);
         }
         LOGD("init done");
         delete[] firstdata;
@@ -61,8 +61,8 @@ public:
     {
         LOGD("stackframe");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i+offset] = nextdata[i];
-            mergedata[i+offset] = nextdata[i];
+            inputdata[i+offset] = ((nextdata[i])<<2);
+            mergedata[i+offset] = ((nextdata[i])<<2);
         }
         mergstacka(input,input_to_merge,output);
         for (int i = 0; i < offset; ++i) {
@@ -77,6 +77,7 @@ public:
         LOGD("write dng");
         DngWriter * writer = new DngWriter();
         writer->customMatrix = customMatrix;
+        profile->rawType = 6;
         writer->dngProfile = profile;
         writer->bayerBytes = (unsigned char*) output.data();
         writer->rawSize = widht*height*2;

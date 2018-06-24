@@ -44,8 +44,8 @@ public class RawStackPipe extends PictureModuleApi2 {
         rawStackCaptureHolder.setForceRawToDng(SettingsManager.get(SettingKeys.forceRawToDng).get());
         rawStackCaptureHolder.setToneMapProfile(((ToneMapChooser)cameraUiWrapper.getParameterHandler().get(SettingKeys.TONEMAP_SET)).getToneMap());
         rawStackCaptureHolder.setSupport12bitRaw(SettingsManager.get(SettingKeys.support12bitRaw).get());
-        rawStackCaptureHolder.setWidth(rawReader.getWidth());
-        rawStackCaptureHolder.setHeight(rawReader.getHeight());
+        rawStackCaptureHolder.setWidth(raw_width);
+        rawStackCaptureHolder.setHeight(raw_height);
         String cmat = SettingsManager.get(SettingKeys.MATRIX_SET).get();
         if (cmat != null && !TextUtils.isEmpty(cmat) &&!cmat.equals("off")) {
             rawStackCaptureHolder.setCustomMatrix(SettingsManager.getInstance().getMatrixesMap().get(cmat));
@@ -55,6 +55,18 @@ public class RawStackPipe extends PictureModuleApi2 {
             rawStackCaptureHolder.setLocation(cameraUiWrapper.getActivityInterface().getLocationManager().getCurrentLocation());
         }
         super.TakePicture();
+    }
+
+    @Override
+    public void InitModule() {
+        super.InitModule();
+        cameraUiWrapper.parametersHandler.get(SettingKeys.M_Burst).SetValue(14,true);
+    }
+
+    @Override
+    public void DestroyModule() {
+        cameraUiWrapper.parametersHandler.get(SettingKeys.M_Burst).SetValue(0,true);
+        super.DestroyModule();
     }
 
     /**
