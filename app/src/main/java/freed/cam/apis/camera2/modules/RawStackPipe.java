@@ -8,6 +8,8 @@ import android.text.TextUtils;
 
 import com.troop.freedcam.R;
 
+import java.io.File;
+
 import freed.cam.apis.basecamera.CameraWrapperInterface;
 import freed.cam.apis.basecamera.modules.ModuleHandlerAbstract;
 import freed.cam.apis.basecamera.parameters.modes.ToneMapChooser;
@@ -22,7 +24,7 @@ public class RawStackPipe extends PictureModuleApi2 {
     private RawStackCaptureHolder rawStackCaptureHolder;
     public RawStackPipe(CameraWrapperInterface cameraUiWrapper, Handler mBackgroundHandler, Handler mainHandler) {
         super(cameraUiWrapper, mBackgroundHandler, mainHandler);
-        name = cameraUiWrapper.getResString(R.string.module_picture);
+        name = cameraUiWrapper.getResString(R.string.module_stacking);
     }
 
     @Override
@@ -42,6 +44,8 @@ public class RawStackPipe extends PictureModuleApi2 {
         rawStackCaptureHolder.setForceRawToDng(SettingsManager.get(SettingKeys.forceRawToDng).get());
         rawStackCaptureHolder.setToneMapProfile(((ToneMapChooser)cameraUiWrapper.getParameterHandler().get(SettingKeys.TONEMAP_SET)).getToneMap());
         rawStackCaptureHolder.setSupport12bitRaw(SettingsManager.get(SettingKeys.support12bitRaw).get());
+        rawStackCaptureHolder.setWidth(rawReader.getWidth());
+        rawStackCaptureHolder.setHeight(rawReader.getHeight());
         String cmat = SettingsManager.get(SettingKeys.MATRIX_SET).get();
         if (cmat != null && !TextUtils.isEmpty(cmat) &&!cmat.equals("off")) {
             rawStackCaptureHolder.setCustomMatrix(SettingsManager.getInstance().getMatrixesMap().get(cmat));
@@ -85,9 +89,21 @@ public class RawStackPipe extends PictureModuleApi2 {
     public void onRdyToSaveImg(ImageCaptureHolder holder) {
         //holder.getRunner().run();
 
-        Log.d(TAG,"onRdyToSaveImg " + BurstCounter.getBurstCount() +"/" +BurstCounter.getImageCaptured());
-        if (BurstCounter.getBurstCount()-1 == BurstCounter.getImageCaptured())
-            rawStackCaptureHolder.writeDng(getFileString()+".dng");
+        Log.d(TAG,"onRdyToSaveImg " + BurstCounter.getBurstCount() +"/" +BurstCounter.getImageCaptured() + "/stack " +rawStackCaptureHolder.getStackCoutn());
+        if (BurstCounter.getBurstCount()-1 == BurstCounter.getImageCaptured()) {
+            String file = getFileString() + ".dng";
+            synchronized (rawStackCaptureHolder) {
+                while (BurstCounter.getBurstCount()-1 != rawStackCaptureHolder.getStackCoutn()) {
+                    try {
+                        rawStackCaptureHolder.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                rawStackCaptureHolder.writeDng(file);
+            }
+            fireOnWorkFinish(new File(file));
+        }
         finishCapture();
     }
 }

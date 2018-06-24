@@ -15,14 +15,12 @@ extern "C"
 
     JNIEXPORT void JNICALL Java_freed_jni_RawStack_setBaseFrame(JNIEnv *env, jobject thiz, jobject javaHandler, jbyteArray input, jint width, jint height) {
         RawStackPipeNative * rawStackPipeNative =  (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);
-        uint16_t * ar = (uint16_t*)copyByteArray(env, input);
-        rawStackPipeNative->init(width,height, ar);
+        rawStackPipeNative->init(width,height, (uint16_t*)copyByteArray(env, input));
     }
 
     JNIEXPORT void JNICALL Java_freed_jni_RawStack_stackFrame(JNIEnv *env, jobject thiz, jobject javaHandler, jbyteArray input) {
         RawStackPipeNative * rawStackPipeNative =  (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);
-        uint16_t * ar = (uint16_t*)copyByteArray(env, input);
-        rawStackPipeNative->stackFrame(ar);
+        rawStackPipeNative->stackFrame((uint16_t*)copyByteArray(env, input));
     }
 
     JNIEXPORT void JNICALL Java_freed_jni_RawStack_writeDng(JNIEnv *env, jobject thiz, jobject javaHandler, jobject dngprofile, jobject matrix,jstring fileout) {
@@ -31,6 +29,7 @@ extern "C"
         CustomMatrix * cmatrix = (CustomMatrix*)env->GetDirectBufferAddress(matrix);
         char * outfile = copyString(env,fileout);
         rawStackPipeNative->writeDng(profile, cmatrix, outfile);
+        delete rawStackPipeNative;
 
     }
 

@@ -23,17 +23,17 @@ public class RawStack {
         byteBuffer = init();
     }
 
-    public void setFirstFrame(byte[] bytes, int width, int height)
+    public synchronized void setFirstFrame(byte[] bytes, int width, int height)
     {
         setBaseFrame(byteBuffer,bytes,width,height);
     }
 
-    public void stackNextFrame(byte[] bytes)
+    public synchronized void stackNextFrame(byte[] bytes)
     {
         stackFrame(byteBuffer,bytes);
     }
 
-    public void saveDng(DngProfile profile, CustomMatrix customMatrix, String fileout)
+    public synchronized void saveDng(DngProfile profile, CustomMatrix customMatrix, String fileout)
     {
         writeDng(byteBuffer,profile.getByteBuffer(),customMatrix.getByteBuffer(),fileout);
         byteBuffer = null;
