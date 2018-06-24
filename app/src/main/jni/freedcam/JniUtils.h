@@ -3,6 +3,7 @@
 //
 #include <jni.h>
 #include <string.h>
+#include "mergstacka.h"
 #ifndef FREEDCAM_JNIUTILS_H
 #define FREEDCAM_JNIUTILS_H
 
@@ -37,6 +38,14 @@ static unsigned char* copyByteArray(JNIEnv* env, jbyteArray input)
 {
     int size = env->GetArrayLength((jarray)input);
     unsigned char* out = new unsigned char[size];
+    env->GetByteArrayRegion (input, 0, size, reinterpret_cast<jbyte*>(out));
+    return out;
+}
+
+static uint16_t* copyByteArrayToUint16_t(JNIEnv* env, jbyteArray input)
+{
+    int size = env->GetArrayLength((jarray)input);
+    uint16_t* out = new uint16_t[size/2];
     env->GetByteArrayRegion (input, 0, size, reinterpret_cast<jbyte*>(out));
     return out;
 }

@@ -65,7 +65,7 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
     private boolean support12bitRaw = false;
 
     private ActivityInterface activityInterface;
-    private RdyToSaveImg rdyToSaveImg;
+    protected RdyToSaveImg rdyToSaveImg;
     private ModuleInterface moduleInterface;
 
     WorkFinishEvents workerfinish;
@@ -359,7 +359,7 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
     }
 
     @NonNull
-    private DngProfile getDngProfile(int rawFormat, Image image) {
+    protected DngProfile getDngProfile(int rawFormat, Image image) {
         int black, white,c;
         try {
             black = characteristics.get(CameraCharacteristics.SENSOR_BLACK_LEVEL_PATTERN).getOffsetForIndex(0,0);

@@ -22,6 +22,17 @@ public class RawStackPipe extends PictureModuleApi2 {
     private RawStackCaptureHolder rawStackCaptureHolder;
     public RawStackPipe(CameraWrapperInterface cameraUiWrapper, Handler mBackgroundHandler, Handler mainHandler) {
         super(cameraUiWrapper, mBackgroundHandler, mainHandler);
+        name = cameraUiWrapper.getResString(R.string.module_picture);
+    }
+
+    @Override
+    public String LongName() {
+        return "HDR+";
+    }
+
+    @Override
+    public String ShortName() {
+        return "HDR+";
     }
 
     @Override
@@ -68,5 +79,15 @@ public class RawStackPipe extends PictureModuleApi2 {
         changeCaptureState(ModuleHandlerAbstract.CaptureStates.image_capture_start);
         Log.d(TAG, "StartStillCapture");
         cameraUiWrapper.captureSessionHandler.StartImageCapture(rawStackCaptureHolder, mBackgroundHandler);
+    }
+
+    @Override
+    public void onRdyToSaveImg(ImageCaptureHolder holder) {
+        //holder.getRunner().run();
+
+        Log.d(TAG,"onRdyToSaveImg " + BurstCounter.getBurstCount() +"/" +BurstCounter.getImageCaptured());
+        if (BurstCounter.getBurstCount()-1 == BurstCounter.getImageCaptured())
+            rawStackCaptureHolder.writeDng(getFileString()+".dng");
+        finishCapture();
     }
 }
