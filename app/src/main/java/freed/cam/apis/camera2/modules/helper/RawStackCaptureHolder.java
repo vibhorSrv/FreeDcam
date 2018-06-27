@@ -1,4 +1,4 @@
-package freed.cam.apis.camera2.modules;
+package freed.cam.apis.camera2.modules.helper;
 
 import android.annotation.TargetApi;
 import android.graphics.ImageFormat;

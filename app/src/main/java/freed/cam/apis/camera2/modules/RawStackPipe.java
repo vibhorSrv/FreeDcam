@@ -13,6 +13,8 @@ import java.io.File;
 import freed.cam.apis.basecamera.CameraWrapperInterface;
 import freed.cam.apis.basecamera.modules.ModuleHandlerAbstract;
 import freed.cam.apis.basecamera.parameters.modes.ToneMapChooser;
+import freed.cam.apis.camera2.modules.helper.ImageCaptureHolder;
+import freed.cam.apis.camera2.modules.helper.RawStackCaptureHolder;
 import freed.settings.SettingKeys;
 import freed.settings.SettingsManager;
 import freed.utils.Log;
@@ -44,8 +46,8 @@ public class RawStackPipe extends PictureModuleApi2 {
         rawStackCaptureHolder.setForceRawToDng(SettingsManager.get(SettingKeys.forceRawToDng).get());
         rawStackCaptureHolder.setToneMapProfile(((ToneMapChooser)cameraUiWrapper.getParameterHandler().get(SettingKeys.TONEMAP_SET)).getToneMap());
         rawStackCaptureHolder.setSupport12bitRaw(SettingsManager.get(SettingKeys.support12bitRaw).get());
-        rawStackCaptureHolder.setWidth(raw_width);
-        rawStackCaptureHolder.setHeight(raw_height);
+        rawStackCaptureHolder.setWidth(output.raw_width);
+        rawStackCaptureHolder.setHeight(output.raw_height);
         String cmat = SettingsManager.get(SettingKeys.MATRIX_SET).get();
         if (cmat != null && !TextUtils.isEmpty(cmat) &&!cmat.equals("off")) {
             rawStackCaptureHolder.setCustomMatrix(SettingsManager.getInstance().getMatrixesMap().get(cmat));
