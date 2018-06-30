@@ -116,6 +116,7 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     uint16_t * input_to_mergedata = input_to_merge.data();
     uint16_t * out = output.data();
     int offsetNextImg = width*height;
+
     for (size_t i = 0; i <  width *  height; i++)
     {
         inputdata[i] = (raw.imgdata.rawdata.raw_image[i]);

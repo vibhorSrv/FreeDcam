@@ -685,11 +685,11 @@ void DngWriter::clear() {
         opcode3 = NULL;
     }
     LOGD("delete bayerbytes");
-    if (bayerBytes != NULL){
+    /*if (bayerBytes != NULL){
         delete [] bayerBytes;
         rawSize = NULL;
         bayerBytes = NULL;
-    }
+    }*/
     LOGD("delete filesavepath");
     if(fileSavePath != NULL)
     {

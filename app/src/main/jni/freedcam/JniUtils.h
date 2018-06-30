@@ -7,7 +7,6 @@
 #ifndef FREEDCAM_JNIUTILS_H
 #define FREEDCAM_JNIUTILS_H
 
-
 static char* copyString(JNIEnv* env, jstring input)
 {
     const char * fsp = env->GetStringUTFChars(input,NULL);
@@ -36,6 +35,8 @@ static int* copyintArray(JNIEnv *env, jintArray input)
 
 static unsigned char* copyByteArray(JNIEnv* env, jbyteArray input)
 {
+    jbyte *data = env->GetByteArrayElements(input, NULL);
+    return (unsigned char*) data;
     int size = env->GetArrayLength((jarray)input);
     unsigned char* out = new unsigned char[size];
     env->GetByteArrayRegion (input, 0, size, reinterpret_cast<jbyte*>(out));
@@ -44,10 +45,8 @@ static unsigned char* copyByteArray(JNIEnv* env, jbyteArray input)
 
 static uint16_t* copyByteArrayToUint16_t(JNIEnv* env, jbyteArray input)
 {
-    int size = env->GetArrayLength((jarray)input);
-    uint16_t* out = new uint16_t[size/2];
-    env->GetByteArrayRegion (input, 0, size, reinterpret_cast<jbyte*>(out));
-    return out;
+    jbyte *data = env->GetByteArrayElements(input, NULL);
+    return (uint16_t*) data;
 }
 
 #endif //FREEDCAM_JNIUTILS_H

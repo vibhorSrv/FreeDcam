@@ -54,7 +54,7 @@ public:
             mergedata[i] = ((firstdata[i])<<2);
         }
         LOGD("init done");
-        delete[] firstdata;
+        //delete[] firstdata;
     }
 
     void stackFrame(uint16_t * nextdata)
@@ -68,7 +68,7 @@ public:
         for (int i = 0; i < offset; ++i) {
             mergedata[i] = outdata[i];
         }
-        delete[] nextdata;
+        //delete[] nextdata;
         LOGD("stackframedone");
     }
 
