@@ -15,7 +15,7 @@
 #include "mergstacka.h"
 #include "HalideBuffer.h"
 
-#define  LOG_TAG    "freedcam.RawToDngNative"
+#define  LOG_TAG    "freedcam.DngStack"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 
 extern "C"
@@ -222,13 +222,12 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
 
     dngw->WriteDNG();
 
+    LOGD("delete matrix");
     delete matrix;
+    LOGD("delete dngprofile");
     delete dngprofile;
-    delete[] data1;
-    delete outfile;
-    delete input;
-    delete input_to_merge;
-    delete output;
 
+    LOGD("delete outfile");
+    delete outfile;
 
 }
