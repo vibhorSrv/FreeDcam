@@ -21,6 +21,7 @@ import freed.cam.apis.basecamera.modules.ModuleInterface;
 import freed.cam.apis.basecamera.modules.WorkFinishEvents;
 import freed.dng.DngProfile;
 import freed.jni.RawStack;
+import freed.settings.SettingsManager;
 import freed.utils.Log;
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -42,6 +43,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     private DngProfile dngProfile;
     private int width;
     private int height;
+    private long rawsize;
 
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
@@ -87,6 +89,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
         else {
             ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             final byte[] bytes = new byte[buffer.remaining()];
+            rawsize = bytes.length;
             buffer.get(bytes);
             final int w = image.getWidth();
             final int h = image.getHeight();
@@ -117,9 +120,12 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     @Override
     public void onCaptureCompleted(CameraCaptureSession session, CaptureRequest request, TotalCaptureResult result) {
         SetCaptureResult(result);
-        if (dngProfile == null)
+        if (dngProfile == null && rawsize !=0)
         {
-            dngProfile = getDngProfile(DngProfile.Plain, width,height);
+            if (SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
+                dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
+            else
+                dngProfile = getDngProfile(DngProfile.Plain, width,height);
         }
     }
 
