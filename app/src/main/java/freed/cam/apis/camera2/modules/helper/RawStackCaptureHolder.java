@@ -48,7 +48,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
         super(characteristicss, isRawCapture, isJpgCapture, activitiy, imageSaver, finish, rdyToSaveImg);
-        imagesToSaveQueue = new ArrayBlockingQueue<>(15);
+        imagesToSaveQueue = new ArrayBlockingQueue<>(10);
 
         imageSaveExecutor = new ThreadPoolExecutor(
                 1,       // Initial pool size
@@ -125,7 +125,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
             if (SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
                 dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
             else
-                dngProfile = getDngProfile(DngProfile.Plain, width,height);
+                dngProfile = getDngProfile(DngProfile.Plain, width,height,true);
         }
     }
 
