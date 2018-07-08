@@ -387,7 +387,10 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
             black = 64;
         }
         try {
-            white = characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL);
+            if (!upscaled)
+                white = characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL);
+            else
+                white = characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL)<<2;
         } catch (Exception e) {
             Log.WriteEx(e);
             white = 1023;
