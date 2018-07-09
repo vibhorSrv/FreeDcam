@@ -48,12 +48,12 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
     }
 
     private final String TAG = ImageCaptureHolder.class.getSimpleName();
-    private CaptureResult captureResult;
+    protected CaptureResult captureResult;
     private List<Image> images;
-    private CameraCharacteristics characteristics;
+    protected CameraCharacteristics characteristics;
     private CustomMatrix customMatrix;
     private ToneMapProfile toneMapProfile;
-    private int orientation = 0;
+    protected int orientation = 0;
     private Location location;
     private boolean externalSD =false;
 

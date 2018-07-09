@@ -72,11 +72,12 @@ public:
         LOGD("stackframedone");
     }
 
-    void writeDng(DngProfile * profile, CustomMatrix * customMatrix, char* outfile)
+    void writeDng(DngProfile * profile, CustomMatrix * customMatrix, char* outfile, ExifInfo * exifInfo)
     {
         LOGD("write dng");
         DngWriter * writer = new DngWriter();
         writer->customMatrix = customMatrix;
+        writer->exifInfo = exifInfo;
         profile->rawType = 6;
         writer->dngProfile = profile;
         writer->bayerBytes = (unsigned char*) output.data();
