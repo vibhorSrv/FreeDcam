@@ -12,6 +12,7 @@ import java.io.File;
 
 import freed.cam.apis.basecamera.CameraWrapperInterface;
 import freed.cam.apis.basecamera.modules.ModuleHandlerAbstract;
+import freed.cam.apis.basecamera.parameters.AbstractParameter;
 import freed.cam.apis.basecamera.parameters.modes.ToneMapChooser;
 import freed.cam.apis.camera2.modules.helper.ImageCaptureHolder;
 import freed.cam.apis.camera2.modules.helper.RawStackCaptureHolder;
@@ -66,14 +67,14 @@ public class RawStackPipe extends PictureModuleApi2 {
         SettingsManager.get(SettingKeys.PictureFormat).set(SettingsManager.getInstance().getResString(R.string.pictureformat_dng16));
 
         super.InitModule();
-        cameraUiWrapper.parametersHandler.get(SettingKeys.PictureFormat).fireIsSupportedChanged(false);
+        cameraUiWrapper.parametersHandler.get(SettingKeys.PictureFormat).setViewState(AbstractParameter.ViewState.Hidden);
         cameraUiWrapper.parametersHandler.get(SettingKeys.M_Burst).SetValue(14,true);
     }
 
     @Override
     public void DestroyModule() {
         cameraUiWrapper.parametersHandler.get(SettingKeys.M_Burst).SetValue(0,true);
-        cameraUiWrapper.parametersHandler.get(SettingKeys.PictureFormat).fireIsSupportedChanged(true);
+        cameraUiWrapper.parametersHandler.get(SettingKeys.PictureFormat).setViewState(AbstractParameter.ViewState.Visible);
         SettingsManager.get(SettingKeys.PictureFormat).set(SettingsManager.get(SettingKeys.lastPictureFormat).get());
         super.DestroyModule();
     }
