@@ -23,6 +23,7 @@ import freed.cam.apis.basecamera.modules.WorkFinishEvents;
 import freed.dng.DngProfile;
 import freed.jni.ExifInfo;
 import freed.jni.RawStack;
+import freed.settings.SettingKeys;
 import freed.settings.SettingsManager;
 import freed.utils.Log;
 
@@ -123,7 +124,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     public void writeDng(String fileout)
     {
         DngProfile dngProfile;
-        if (SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
+        if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() &&SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
             dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
         else
             dngProfile = getDngProfile(DngProfile.Plain, width,height,true);
