@@ -170,6 +170,16 @@ void DngWriter::writeIfd0(TIFF *tif) {
     {
         TIFFSetField(tif,TIFFTAG_BASELINEEXPOSUREOFFSET, baselineExposureOffset);
     }
+    if(opcode2Size >0)
+    {
+        LOGD("Set OP2");
+        TIFFSetField(tif, TIFFTAG_OPC2, opcode2Size, opcode2);
+    }
+    if(opcode3Size >0)
+    {
+        LOGD("Set OP3");
+        TIFFSetField(tif, TIFFTAG_OPC3, opcode3Size, opcode3);
+    }
 
 }
 
@@ -624,16 +634,7 @@ void DngWriter::writeRawStuff(TIFF *tif) {
     //**********************************************************************************
 
     LOGD("Set OP or not");
-    if(opcode2Size >0)
-    {
-        LOGD("Set OP2");
-        TIFFSetField(tif, TIFFTAG_OPC2, opcode2Size, opcode2);
-    }
-    if(opcode3Size >0)
-    {
-        LOGD("Set OP3");
-        TIFFSetField(tif, TIFFTAG_OPC3, opcode3Size, opcode3);
-    }
+
     if(dngProfile->rawType == RAW_10BIT_TIGHT_SHIFT)
     {
         LOGD("Processing tight RAW data...");
@@ -751,7 +752,7 @@ void DngWriter::WriteDNG() {
     
     writeRawStuff(tif);
 
-    TIFFRewriteDirectory(tif);
+    TIFFWriteDirectory(tif);
     TIFFClose(tif);
 
 
