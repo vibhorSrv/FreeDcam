@@ -751,7 +751,7 @@ void DngWriter::WriteDNG() {
     
     writeRawStuff(tif);
 
-    TIFFWriteDirectory(tif);
+    TIFFRewriteDirectory(tif);
     TIFFClose(tif);
 
 
