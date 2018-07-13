@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import freed.dng.CustomMatrix;
 import freed.dng.DngProfile;
+import freed.settings.SettingsManager;
 
 public class RawStack {
     static
@@ -16,7 +17,7 @@ public class RawStack {
     private native ByteBuffer init();
     private native void setBaseFrame(ByteBuffer buffer, byte[] fileBytes,int width, int heigt);
     private native void stackFrame(ByteBuffer buffer, byte[] nextframe);
-    private native void writeDng(ByteBuffer buffer, ByteBuffer dngprofile, ByteBuffer customMatrix, String outfile, ByteBuffer exifinfo);
+    private native void writeDng(ByteBuffer buffer, ByteBuffer dngprofile, ByteBuffer customMatrix, String outfile, ByteBuffer exifinfo, byte[] opc2, byte[] opc3);
 
     public RawStack()
     {
@@ -35,7 +36,7 @@ public class RawStack {
 
     public synchronized void saveDng(DngProfile profile, CustomMatrix customMatrix, String fileout, ExifInfo exifInfo)
     {
-        writeDng(byteBuffer,profile.getByteBuffer(),customMatrix.getByteBuffer(),fileout,exifInfo.getByteBuffer());
+        writeDng(byteBuffer,profile.getByteBuffer(),customMatrix.getByteBuffer(),fileout,exifInfo.getByteBuffer(), SettingsManager.getInstance().getOpcode2(),SettingsManager.getInstance().getOpcode3());
         byteBuffer = null;
     }
 }
