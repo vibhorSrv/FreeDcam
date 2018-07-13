@@ -99,8 +99,7 @@ public class RawStackPipe extends PictureModuleApi2 {
         {
             rawReader.setOnImageAvailableListener(rawStackCaptureHolder,mBackgroundHandler);
         }
-
-        cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
+        
         prepareCaptureBuilder(BurstCounter.getImageCaptured());
         changeCaptureState(ModuleHandlerAbstract.CaptureStates.image_capture_start);
         Log.d(TAG, "StartStillCapture");
