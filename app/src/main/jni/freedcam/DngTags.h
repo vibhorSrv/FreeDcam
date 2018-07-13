@@ -58,8 +58,8 @@
 
 
 static const TIFFFieldInfo  dngFields[] = {
-        { TIFFTAG_OPC2, -3, -3, TIFF_BYTE, FIELD_CUSTOM, 0, 1, "OpcodeList2" },
-        { TIFFTAG_OPC3, -3, -3, TIFF_BYTE,FIELD_CUSTOM, 0, 1, "OpcodeList3" },
+        { TIFFTAG_OPC2, -3, -3, TIFF_UNDEFINED, FIELD_CUSTOM, 0, 1, "OpcodeList2" },
+        { TIFFTAG_OPC3, -3, -3, TIFF_UNDEFINED,FIELD_CUSTOM, 0, 1, "OpcodeList3" },
         { TIFFTAG_PROFILETONECURVE, -1, -1, TIFF_FLOAT, FIELD_CUSTOM, 0, 1, "ProfileToneCurve" },
         { TIFFTAG_PROFILEHUESATMAPDATA1, -1, -1, TIFF_FLOAT, FIELD_CUSTOM, 0, 1, "ProfileHueSatMapData1" },
         { TIFFTAG_PROFILEHUESATMAPDATA2, -1, -1, TIFF_FLOAT, FIELD_CUSTOM, 0, 1, "ProfileHueSatMapData2" },
