@@ -37,10 +37,6 @@ static unsigned char* copyByteArray(JNIEnv* env, jbyteArray input)
 {
     jbyte *data = env->GetByteArrayElements(input, NULL);
     return (unsigned char*) data;
-    int size = env->GetArrayLength((jarray)input);
-    unsigned char* out = new unsigned char[size];
-    env->GetByteArrayRegion (input, 0, size, reinterpret_cast<jbyte*>(out));
-    return out;
 }
 
 static uint16_t* copyByteArrayToUint16_t(JNIEnv* env, jbyteArray input)

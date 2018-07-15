@@ -72,8 +72,7 @@ public:
         LOGD("stackframedone");
     }
 
-    void writeDng(DngProfile * profile, CustomMatrix * customMatrix, char* outfile, ExifInfo * exifInfo,
-                  jbyteArray op2, jbyteArray op3, JNIEnv *env)
+    void writeDng(DngProfile * profile, CustomMatrix * customMatrix, char* outfile, ExifInfo * exifInfo)
     {
         LOGD("write dng");
         DngWriter * writer = new DngWriter();
@@ -86,10 +85,6 @@ public:
         writer->_make = "hdr+";
         writer->_model = "model";
         writer->fileSavePath = (char*)outfile;
-        writer->opcode2Size = env->GetArrayLength(op2);
-        writer->opcode2 = copyByteArray(env,op2);
-        writer->opcode3Size = env->GetArrayLength(op3);
-        writer->opcode3 = copyByteArray(env,op3);
         writer->WriteDNG();
 
         delete writer;
