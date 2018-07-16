@@ -113,10 +113,10 @@ public class RawStackPipe extends PictureModuleApi2 {
         Log.d(TAG,"onRdyToSaveImg " + BurstCounter.getBurstCount() +"/" +BurstCounter.getImageCaptured() + "/stack " +rawStackCaptureHolder.getStackCoutn());
         if (BurstCounter.getBurstCount()-1 == BurstCounter.getImageCaptured()) {
             String file = getFileString() + ".dng";
-            synchronized (rawStackCaptureHolder) {
+            synchronized (RawStackCaptureHolder.class) {
                 while (BurstCounter.getBurstCount()-1 != rawStackCaptureHolder.getStackCoutn()) {
                     try {
-                        rawStackCaptureHolder.wait();
+                        RawStackCaptureHolder.class.wait();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }

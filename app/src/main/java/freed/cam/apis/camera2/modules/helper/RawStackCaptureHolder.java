@@ -50,7 +50,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
         super(characteristicss, isRawCapture, isJpgCapture, activitiy, imageSaver, finish, rdyToSaveImg);
-        imagesToSaveQueue = new ArrayBlockingQueue<>(10);
+        imagesToSaveQueue = new ArrayBlockingQueue<>(7);
 
         imageSaveExecutor = new ThreadPoolExecutor(
                 1,       // Initial pool size
@@ -83,35 +83,59 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     @Override
     public void onImageAvailable(ImageReader reader) {
         Log.d(TAG, "OnRawAvailible waiting: " + imageSaveExecutor.getActiveCount());
+        synchronized (RawStackCaptureHolder.class)
+        {
+            while (imagesToSaveQueue.remainingCapacity() == 1) {
+                try {
+                    RawStackCaptureHolder.class.wait();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
         final Image image = reader.acquireLatestImage();
-        if ( image == null)
+        if (image == null)
             return;
         if (image.getFormat() != ImageFormat.RAW_SENSOR)
             image.close();
         else {
-            ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+            /*ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             final byte[] bytes = new byte[buffer.remaining()];
             rawsize = bytes.length;
-            buffer.get(bytes);
+            buffer.get(bytes);*/
+            Log.d(TAG, "add image to Queue left:" + imagesToSaveQueue.remainingCapacity());
+            rdyToSaveImg.onRdyToSaveImg(RawStackCaptureHolder.this);
+            imageSaveExecutor.execute(new StackRunner(image));
+        }
+    }
+
+    private class StackRunner implements Runnable
+    {
+        private final  Image image;
+        public StackRunner(Image image)
+        {
+            this.image  = image;
+        }
+
+        @Override
+        public void run() {
+
+            final ByteBuffer buffer = image.getPlanes()[0].getBuffer();
             final int w = image.getWidth();
             final int h = image.getHeight();
+            rawsize = buffer.remaining();
+            Log.d(TAG, "stackframes");
+            if (stackCoutn == 0) {
+                rawStack.setFirstFrame(buffer, w, h);
+            } else
+                rawStack.stackNextFrame(buffer);
+            stackCoutn++;
             image.close();
             buffer.clear();
-            rdyToSaveImg.onRdyToSaveImg(RawStackCaptureHolder.this);
-            imageSaveExecutor.execute(() -> {
-
-                        Log.d(TAG, "stackframes");
-                        if (stackCoutn == 0) {
-                            rawStack.setFirstFrame(bytes, w, h);
-                        } else
-                            rawStack.stackNextFrame(bytes);
-                        stackCoutn++;
-                        Log.d(TAG, "stackframes done");
-                synchronized (RawStackCaptureHolder.this) {
-                        RawStackCaptureHolder.this.notify();
-                    }
-
-            });
+            Log.d(TAG, "stackframes done");
+            synchronized (RawStackCaptureHolder.class) {
+                RawStackCaptureHolder.class.notify();
+            }
         }
     }
 
