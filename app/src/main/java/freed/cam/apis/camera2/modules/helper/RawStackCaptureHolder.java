@@ -50,7 +50,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
         super(characteristicss, isRawCapture, isJpgCapture, activitiy, imageSaver, finish, rdyToSaveImg);
-        imagesToSaveQueue = new ArrayBlockingQueue<>(7);
+        imagesToSaveQueue = new ArrayBlockingQueue<>(6);
 
         imageSaveExecutor = new ThreadPoolExecutor(
                 1,       // Initial pool size

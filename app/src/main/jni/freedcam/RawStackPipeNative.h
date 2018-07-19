@@ -88,6 +88,9 @@ public:
         writer->WriteDNG();
 
         delete writer;
+        input_to_merge.deallocate();
+        input.deallocate();
+        output.deallocate();
         /*
         input_to_merge.deallocate();
         delete[] input_to_merge.data();
