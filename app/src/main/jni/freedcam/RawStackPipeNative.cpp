@@ -33,19 +33,12 @@ extern "C"
         rawStackPipeNative->stackFrame((uint16_t*)env->GetDirectBufferAddress(input));
     }
 
-    JNIEXPORT void JNICALL Java_freed_jni_RawStack_SetOpCode2(JNIEnv *env, jobject thiz, jbyteArray opcode,jobject javaHandler)
+    JNIEXPORT void JNICALL Java_freed_jni_RawStack_SetOpCode(JNIEnv *env, jobject thiz, jobject opcode,jobject javaHandler)
     {
-        DngWriter* writer = (DngWriter*)env->GetDirectBufferAddress(javaHandler);
-        writer->opcode2Size = env->GetArrayLength(opcode);
-        writer->opcode2 = copyByteArray(env,opcode);
+        RawStackPipeNative* writer = (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);
+        writer->opCode = (OpCode*)env->GetDirectBufferAddress(opcode);
     }
 
-    JNIEXPORT void JNICALL Java_freed_jni_RawStack_SetOpCode3(JNIEnv *env, jobject thiz, jbyteArray opcode,jobject javaHandler)
-    {
-        DngWriter* writer = (DngWriter*)env->GetDirectBufferAddress(javaHandler);
-        writer->opcode3Size = env->GetArrayLength(opcode);
-        writer->opcode3 = copyByteArray(env,opcode);
-    }
 
     JNIEXPORT void JNICALL Java_freed_jni_RawStack_writeDng(JNIEnv *env, jobject thiz, jobject javaHandler, jobject dngprofile, jobject matrix,jstring fileout, jobject exifinfo) {
         RawStackPipeNative * rawStackPipeNative = (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);

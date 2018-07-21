@@ -5,8 +5,11 @@ import java.nio.ByteBuffer;
 import freed.dng.CustomMatrix;
 import freed.dng.DngProfile;
 import freed.settings.SettingsManager;
+import freed.utils.Log;
 
 public class RawStack {
+
+    private final String TAG = RawStack.class.getSimpleName();
     static
     {
         System.loadLibrary("freedcam");
@@ -20,8 +23,7 @@ public class RawStack {
     private native void stackFrame(ByteBuffer buffer, byte[] nextframe);
     private native void stackFrameBuffer(ByteBuffer buffer, ByteBuffer nextframe);
     private native void writeDng(ByteBuffer buffer, ByteBuffer dngprofile, ByteBuffer customMatrix, String outfile, ByteBuffer exifinfo);
-    private native void SetOpCode3(byte[] opcode,ByteBuffer byteBuffer);
-    private native void SetOpCode2(byte[] opcode,ByteBuffer byteBuffer);
+    private native void SetOpCode(ByteBuffer opcode,ByteBuffer byteBuffer);
 
     public RawStack()
     {
@@ -50,10 +52,10 @@ public class RawStack {
 
     public synchronized void saveDng(DngProfile profile, CustomMatrix customMatrix, String fileout, ExifInfo exifInfo)
     {
-        if (SettingsManager.getInstance().getOpcode2() != null)
-            SetOpCode2(SettingsManager.getInstance().getOpcode2(),byteBuffer);
-        if (SettingsManager.getInstance().getOpcode3() != null)
-            SetOpCode3(SettingsManager.getInstance().getOpcode3(),byteBuffer);
+        if (SettingsManager.getInstance().getOpCode() != null) {
+            Log.d(TAG, "setOpCode");
+            SetOpCode(SettingsManager.getInstance().getOpCode().getByteBuffer(), byteBuffer);
+        }
         writeDng(byteBuffer,profile.getByteBuffer(),customMatrix.getByteBuffer(),fileout,exifInfo.getByteBuffer());
         byteBuffer = null;
     }

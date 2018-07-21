@@ -7,6 +7,7 @@
 #include "DngProfile.h"
 #include "CustomMatrix.h"
 #include "DngWriter.h"
+#include "OpCode.h"
 #include <jni.h>
 #include <stdlib.h>
 #include <android/log.h>
@@ -29,6 +30,7 @@ public:
     int widht;
     int height;
     int offset;
+    OpCode * opCode =NULL;
 
     void init(int width, int height, uint16_t * firstdata)
     {
@@ -85,6 +87,8 @@ public:
         writer->_make = "hdr+";
         writer->_model = "model";
         writer->fileSavePath = (char*)outfile;
+        if(opCode != NULL)
+            writer->opCode = opCode;
         writer->WriteDNG();
 
         delete writer;
