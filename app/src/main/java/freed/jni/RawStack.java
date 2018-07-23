@@ -24,6 +24,7 @@ public class RawStack {
     private native void stackFrameBuffer(ByteBuffer buffer, ByteBuffer nextframe);
     private native void writeDng(ByteBuffer buffer, ByteBuffer dngprofile, ByteBuffer customMatrix, String outfile, ByteBuffer exifinfo);
     private native void SetOpCode(ByteBuffer opcode,ByteBuffer byteBuffer);
+    private native byte[] getOutput(ByteBuffer byteBuffer);
 
     public RawStack()
     {
@@ -58,5 +59,12 @@ public class RawStack {
         }
         writeDng(byteBuffer,profile.getByteBuffer(),customMatrix.getByteBuffer(),fileout,exifInfo.getByteBuffer());
         byteBuffer = null;
+    }
+
+    public synchronized byte[] getOutputBuffer()
+    {
+        if (byteBuffer != null)
+            return getOutput(byteBuffer);
+        return null;
     }
 }

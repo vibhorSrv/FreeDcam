@@ -6,11 +6,15 @@ import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.CaptureResult;
+import android.hardware.camera2.DngCreator;
 import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
+import android.util.Size;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -50,7 +54,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
         super(characteristicss, isRawCapture, isJpgCapture, activitiy, imageSaver, finish, rdyToSaveImg);
-        imagesToSaveQueue = new ArrayBlockingQueue<>(6);
+        imagesToSaveQueue = new ArrayBlockingQueue<>(4);
 
         imageSaveExecutor = new ThreadPoolExecutor(
                 1,       // Initial pool size
@@ -93,6 +97,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
                 }
             }
         }
+
         final Image image = reader.acquireLatestImage();
         if (image == null)
             return;
@@ -107,6 +112,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
             rdyToSaveImg.onRdyToSaveImg(RawStackCaptureHolder.this);
             imageSaveExecutor.execute(new StackRunner(image));
         }
+
     }
 
     private class StackRunner implements Runnable
@@ -147,14 +153,43 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     public void writeDng(String fileout)
     {
-        DngProfile dngProfile;
-        if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() &&SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
-            dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
+        if (SettingsManager.get(SettingKeys.forceRawToDng).get()) {
+            DngProfile dngProfile;
+            if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
+                dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
+            else
+                dngProfile = getDngProfile(DngProfile.Plain, width, height, true);
+            rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, getExifInfo());
+            rawStack = null;
+            imageSaveExecutor.shutdown();
+        }
         else
-            dngProfile = getDngProfile(DngProfile.Plain, width,height,true);
-        rawStack.saveDng(dngProfile, dngProfile.matrixes,fileout, getExifInfo());
-        rawStack = null;
-        imageSaveExecutor.shutdown();
+        {
+            DngCreator dngCreator = new DngCreator(characteristics, captureResult);
+            try {
+                dngCreator.setOrientation(orientation);
+            }
+            catch (IllegalArgumentException ex)
+            {
+                Log.WriteEx(ex);
+            }
+
+            //if (location != null)
+            //    dngCreator.setLocation(location);
+            try {
+                final Size outSize = new Size(width,height);
+
+                final ByteBuffer outbuffer = ByteBuffer.wrap(rawStack.getOutputBuffer());
+                int sss = outbuffer.remaining();
+                dngCreator.writeByteBuffer(new FileOutputStream(fileout),outSize,outbuffer,0);
+                outbuffer.clear();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            dngCreator.close();
+            rawStack = null;
+            imageSaveExecutor.shutdown();
+        }
     }
 
     private ExifInfo getExifInfo()
