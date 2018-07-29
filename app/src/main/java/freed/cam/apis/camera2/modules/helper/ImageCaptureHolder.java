@@ -360,7 +360,7 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
         if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(bytes.length) != null)
             prof = SettingsManager.getInstance().getDngProfilesMap().get(bytes.length);
         else
-            prof = getDngProfile(rawFormat, image.getWidth(),image.getHeight(),false);
+            prof = getDngProfile(rawFormat, image.getWidth(),image.getHeight(),0);
         image.close();
         image = null;
         prof.toneMapProfile = this.toneMapProfile;
@@ -371,25 +371,18 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
     }
 
     @NonNull
-    protected DngProfile getDngProfile(int rawFormat, int width, int height, boolean upscaled) {
+    protected DngProfile getDngProfile(int rawFormat, int width, int height, int upscaled) {
         int black, white,c;
         try {
-            if (!upscaled)
-                black = characteristics.get(CameraCharacteristics.SENSOR_BLACK_LEVEL_PATTERN).getOffsetForIndex(0,0);
-            else {
                 black = characteristics.get(CameraCharacteristics.SENSOR_BLACK_LEVEL_PATTERN).getOffsetForIndex(0, 0);
                 if (black > 0)
-                    black = black<<2;
-            }
+                    black = black << upscaled;
         } catch (NullPointerException e) {
             Log.WriteEx(e);
             black = 64;
         }
         try {
-            if (!upscaled)
-                white = characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL);
-            else
-                white = characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL)<<2;
+                white = characteristics.get(CameraCharacteristics.SENSOR_INFO_WHITE_LEVEL) << upscaled;
         } catch (Exception e) {
             Log.WriteEx(e);
             white = 1023;

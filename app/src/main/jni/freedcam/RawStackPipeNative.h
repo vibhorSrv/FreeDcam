@@ -31,10 +31,11 @@ public:
     int height;
     int offset;
     OpCode * opCode =NULL;
+    int upshift = 0;
 
     void init(int width, int height, uint16_t * firstdata)
     {
-        LOGD("init");
+        LOGD("init upshift %i", upshift);
         this->widht = width;
         this->height = height;
         offset = width*height;
@@ -52,8 +53,8 @@ public:
         outdata = output.data();
         LOGD("copy data");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i] = ((firstdata[i])<<2);
-            mergedata[i] = ((firstdata[i])<<2);
+            inputdata[i] = ((firstdata[i])<<upshift);
+            mergedata[i] = ((firstdata[i])<<upshift);
         }
         LOGD("init done");
         //delete[] firstdata;
@@ -63,8 +64,8 @@ public:
     {
         LOGD("stackframe");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i+offset] = ((nextdata[i])<<2);
-            mergedata[i+offset] = ((nextdata[i])<<2);
+            inputdata[i+offset] = ((nextdata[i])<<upshift);
+            mergedata[i+offset] = ((nextdata[i])<<upshift);
         }
         mergstacka(input,input_to_merge,output);
         for (int i = 0; i < offset; ++i) {

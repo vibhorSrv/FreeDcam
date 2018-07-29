@@ -16,6 +16,7 @@ import android.util.Size;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -50,6 +51,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     private int width;
     private int height;
     private long rawsize;
+    private int upshift = 0;
 
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
@@ -73,6 +75,19 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
         });
         rawStack =new RawStack();
         stackCoutn = 0;
+        //use freedcam dng converter
+        if (SettingsManager.get(SettingKeys.forceRawToDng).get())
+        {
+            //if input data is 12bit only scale it by 2, else it would clip high/lights = 14bit
+            if (SettingsManager.get(SettingKeys.support12bitRaw).get())
+                upshift = 2;
+            else //shift 10bit input up to 14bit
+                upshift = 4;
+        }
+        else //use stock dngcreator, dont scale it up till we found a way to manipulate black and whitelvl from the capture result
+            upshift = 0;
+
+        rawStack.setShift(upshift);
     }
 
     public void setWidth(int width)
@@ -158,7 +173,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
             if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
                 dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
             else
-                dngProfile = getDngProfile(DngProfile.Plain, width, height, true);
+                dngProfile = getDngProfile(DngProfile.Plain, width, height, upshift);
             rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, getExifInfo());
             rawStack = null;
             imageSaveExecutor.shutdown();

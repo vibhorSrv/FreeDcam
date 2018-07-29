@@ -48,6 +48,12 @@ extern "C"
         writer->opCode = (OpCode*)env->GetDirectBufferAddress(opcode);
     }
 
+    JNIEXPORT void JNICALL Java_freed_jni_RawStack_setUpShift(JNIEnv *env, jobject thiz,jobject javaHandler,jint upshift)
+    {
+        RawStackPipeNative* writer = (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);
+        writer->upshift = upshift;
+    }
+
 
     JNIEXPORT void JNICALL Java_freed_jni_RawStack_writeDng(JNIEnv *env, jobject thiz, jobject javaHandler, jobject dngprofile, jobject matrix,jstring fileout, jobject exifinfo) {
         RawStackPipeNative * rawStackPipeNative = (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);

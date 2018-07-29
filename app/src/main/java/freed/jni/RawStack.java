@@ -25,10 +25,17 @@ public class RawStack {
     private native void writeDng(ByteBuffer buffer, ByteBuffer dngprofile, ByteBuffer customMatrix, String outfile, ByteBuffer exifinfo);
     private native void SetOpCode(ByteBuffer opcode,ByteBuffer byteBuffer);
     private native byte[] getOutput(ByteBuffer byteBuffer);
+    private native void setUpShift(ByteBuffer byteBuffer, int upshift);
 
     public RawStack()
     {
         byteBuffer = init();
+    }
+
+    public synchronized void setShift(int shift)
+    {
+        if (byteBuffer != null)
+            setUpShift(byteBuffer,shift);
     }
 
     public synchronized void setFirstFrame(byte[] bytes, int width, int height)
