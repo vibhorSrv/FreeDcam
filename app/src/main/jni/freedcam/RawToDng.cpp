@@ -111,6 +111,7 @@ extern "C"
     {
         DngWriter* writer = (DngWriter*)env->GetDirectBufferAddress(javaHandler);
         writer->opCode = (OpCode*)env->GetDirectBufferAddress(opcodeHandler);
+        LOGD("opcodesize 2 : %i  3: %i", writer->opCode->op2Size, writer->opCode->op3Size);
     }
 
 

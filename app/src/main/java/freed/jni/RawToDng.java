@@ -224,6 +224,8 @@ public class RawToDng
             if (profile.toneMapProfile.getBaselineExposure() != null)
                 SetBaselineExposure(profile.toneMapProfile.getBaselineExposure(),byteBuffer);
         }
+        if (opCode != null)
+            SetOpCode(byteBuffer, opCode.getByteBuffer());
         SetBayerInfo(profile.matrixes.getByteBuffer(),profile.getByteBuffer(),byteBuffer);
         WriteDNG(byteBuffer);
         recycle(byteBuffer);

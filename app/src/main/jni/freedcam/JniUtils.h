@@ -33,6 +33,14 @@ static int* copyintArray(JNIEnv *env, jintArray input)
     return out;
 }
 
+static unsigned char* copyByteArrayRegion(JNIEnv* env, jbyteArray input)
+{
+    int size = env->GetArrayLength((jbyteArray)input);
+    unsigned char* out = new unsigned char[size];
+    env->GetByteArrayRegion (input, 0, size, reinterpret_cast<jbyte*>(out));
+    return (unsigned char*) out;
+}
+
 static unsigned char* copyByteArray(JNIEnv* env, jbyteArray input)
 {
     jbyte *data = env->GetByteArrayElements(input, NULL);

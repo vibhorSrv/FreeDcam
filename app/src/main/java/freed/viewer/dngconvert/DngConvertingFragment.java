@@ -420,6 +420,9 @@ public class DngConvertingFragment extends Fragment
         double altitude = 561.0;
         if (fakeGPS.isChecked())
             dng.SetGpsData(altitude, latitude, longitude, provider, gpsTime);*/
+
+        if (SettingsManager.getInstance().getOpCode() != null)
+            dng.setOpCode(SettingsManager.getInstance().getOpCode());
         dng.WriteDngWithProfile(dngprofile);
         data = null;
         Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
