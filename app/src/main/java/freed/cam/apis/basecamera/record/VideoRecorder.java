@@ -43,9 +43,9 @@ public class VideoRecorder {
     CameraWrapperInterface cameraWrapperInterface;
     private Surface previewSurface;
 
-    public VideoRecorder(CameraWrapperInterface cameraWrapperInterface)
+    public VideoRecorder(CameraWrapperInterface cameraWrapperInterface,MediaRecorder recorder)
     {
-        mediaRecorder = new MediaRecorder();
+        mediaRecorder = recorder;
         this.cameraWrapperInterface = cameraWrapperInterface;
     }
 
@@ -109,8 +109,10 @@ public class VideoRecorder {
             mediaRecorder.setCamera(camera);
         if (previewSurface != null)
             mediaRecorder.setPreviewDisplay(previewSurface);
-        mediaRecorder.setMaxFileSize(3037822976L); //~2.8 gigabyte
-        mediaRecorder.setMaxDuration(7200000); //2hours
+        if (currentVideoProfile.maxRecordingSize != 0)
+            mediaRecorder.setMaxFileSize(currentVideoProfile.maxRecordingSize);
+        if (currentVideoProfile.duration != 0)
+            mediaRecorder.setMaxDuration(currentVideoProfile.duration);
         if (errorListener != null)
             mediaRecorder.setOnErrorListener(errorListener);
 

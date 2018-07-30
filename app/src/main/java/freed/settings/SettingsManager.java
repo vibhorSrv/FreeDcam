@@ -46,6 +46,7 @@ import freed.settings.mode.SettingInterface;
 import freed.utils.Log;
 import freed.utils.StringUtils;
 import freed.utils.VideoMediaProfile;
+import freed.views.VideoToneCurveProfile;
 
 /**
  * Created by troop on 19.08.2014.
@@ -113,6 +114,7 @@ public class SettingsManager implements SettingsManagerInterface {
     private String mDevice;
     private HashMap<String, CustomMatrix> matrixes;
     private HashMap<String, ToneMapProfile> tonemapProfiles;
+    private HashMap<String, VideoToneCurveProfile> videoToneCurveProfiles;
     private LongSparseArray<DngProfile> dngProfileHashMap;
     private OpCode opCode;
     private SharedPreferences settings;
@@ -265,6 +267,16 @@ public class SettingsManager implements SettingsManagerInterface {
     public HashMap<String, ToneMapProfile> getToneMapProfiles()
     {
         return tonemapProfiles;
+    }
+
+    public HashMap<String, VideoToneCurveProfile> getVideoToneCurveProfiles()
+    {
+        return videoToneCurveProfiles;
+    }
+
+    public void saveVideoToneCurveProfile(VideoToneCurveProfile videoToneCurveProfile)
+    {
+        videoToneCurveProfiles.put(videoToneCurveProfile.name, videoToneCurveProfile);
     }
 
 
