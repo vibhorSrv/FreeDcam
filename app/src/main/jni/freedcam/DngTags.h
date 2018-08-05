@@ -76,6 +76,7 @@ static const TIFFFieldInfo  dngFields[] = {
         { EXIFTAG_FOCALLENGTH, 1, 1, TIFF_RATIONAL, FIELD_CUSTOM, 1, 0, "FocalLength" },
         { EXIFTAG_EXPOSUREINDEX, 1, 1, TIFF_RATIONAL, FIELD_CUSTOM, 1, 0, "ExposureIndex" },
         { TIFFTAG_EP_STANDARD_ID, 4, 4, TIFF_BYTE,  FIELD_CUSTOM, 0, 0, "TIFFEPStandardID" },
+        { TIFFTAG_ACTIVEAREA,	4, 4,	TIFF_LONG,	FIELD_CUSTOM, 0, 0, "ActiveArea" },
 
 
 };
