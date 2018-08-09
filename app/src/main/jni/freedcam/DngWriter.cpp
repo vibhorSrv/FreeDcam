@@ -122,6 +122,8 @@ void DngWriter::writeIfd0(TIFF *tif) {
     LOGD("colormatrix1");
     TIFFSetField(tif, TIFFTAG_ASSHOTNEUTRAL, 3, customMatrix->neutralColorMatrix);
     LOGD("neutralMatrix");
+
+    TIFFSetField(tif, TIFFTAG_ANALOGBALANCE, 3, (float[3]){ 1.0, 1.0, 1.0 });
     //STANDARD A = FIIRST 17
     //D65 21 Second According to DNG SPEC 1.4 this is the correct order
     TIFFSetField(tif, TIFFTAG_CALIBRATIONILLUMINANT1, 21);
@@ -165,8 +167,8 @@ void DngWriter::writeIfd0(TIFF *tif) {
         TIFFSetField(tif,TIFFTAG_PROFILEHUESATMAPDATA2, huesatmapdata2_size,huesatmapdata2);
     }
     LOGD("baselineExposure");
-    if(baselineExposure != NULL)
-        TIFFSetField(tif,TIFFTAG_BASELINEEXPOSURE, baselineExposure);
+    double baseS = baselineExposure;
+    TIFFSetField(tif,TIFFTAG_BASELINEEXPOSURE, baseS);
     LOGD("baselineExposureOffset");
     if(baselineExposureOffset != NULL)
     {
@@ -183,6 +185,7 @@ void DngWriter::writeIfd0(TIFF *tif) {
     TIFFSetField(tif,TIFFTAG_DEFAULTCROPORIGIN,defaultCropOrigin);
     LOGD("defaultCropSize");
     TIFFSetField(tif,TIFFTAG_DEFAULTCROPSIZE, defaultCropSize);
+    TIFFSetField(tif,TIFFTAG_DEFAULTSCALE, (float[2]) {1,1});
 
     if(dngProfile->activearea != nullptr)
     {
