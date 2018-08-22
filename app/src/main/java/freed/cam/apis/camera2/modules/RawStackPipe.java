@@ -40,6 +40,7 @@ public class RawStackPipe extends PictureModuleApi2 {
         return "HDR+";
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void TakePicture() {
         rawStackCaptureHolder = new RawStackCaptureHolder(cameraHolder.characteristics, true, false, cameraUiWrapper.getActivityInterface(),this,this, this);
@@ -55,7 +56,14 @@ public class RawStackPipe extends PictureModuleApi2 {
         }
         if (cameraUiWrapper.getParameterHandler().get(SettingKeys.LOCATION_MODE).GetStringValue().equals(SettingsManager.getInstance().getResString(R.string.on_)))
         {
-            rawStackCaptureHolder.setLocation(cameraUiWrapper.getActivityInterface().getLocationManager().getCurrentLocation());
+            cameraUiWrapper.captureSessionHandler.SetParameter(CaptureRequest.JPEG_GPS_LOCATION,cameraUiWrapper.getActivityInterface().getLocationManager().getCurrentLocation());
+        }
+
+        if (jpegReader != null)
+            jpegReader.setOnImageAvailableListener(rawStackCaptureHolder,mBackgroundHandler);
+        if (rawReader != null)
+        {
+            rawReader.setOnImageAvailableListener(rawStackCaptureHolder,mBackgroundHandler);
         }
         super.TakePicture();
     }
@@ -88,17 +96,7 @@ public class RawStackPipe extends PictureModuleApi2 {
 
         Log.d(TAG,"########### captureStillPicture ###########");
 
-        if (cameraUiWrapper.getParameterHandler().get(SettingKeys.LOCATION_MODE).GetStringValue().equals(SettingsManager.getInstance().getResString(R.string.on_)))
-        {
-            cameraUiWrapper.captureSessionHandler.SetParameter(CaptureRequest.JPEG_GPS_LOCATION,cameraUiWrapper.getActivityInterface().getLocationManager().getCurrentLocation());
-        }
 
-        if (jpegReader != null)
-            jpegReader.setOnImageAvailableListener(rawStackCaptureHolder,mBackgroundHandler);
-        if (rawReader != null)
-        {
-            rawReader.setOnImageAvailableListener(rawStackCaptureHolder,mBackgroundHandler);
-        }
         
         prepareCaptureBuilder(BurstCounter.getImageCaptured());
         changeCaptureState(ModuleHandlerAbstract.CaptureStates.image_capture_start);
