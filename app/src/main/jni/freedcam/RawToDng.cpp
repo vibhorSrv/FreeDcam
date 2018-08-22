@@ -170,6 +170,12 @@ extern "C"
         DngWriter* writer = (DngWriter*)env->GetDirectBufferAddress(javaHandler);
         writer->baselineExposureOffset = baselineexposureoffset;
     }
+
+    JNIEXPORT void JNICALL Java_freed_jni_RawToDng_setBayerGreenSplit(JNIEnv *env, jobject thiz,jint greensplit,jobject javaHandler)
+    {
+        DngWriter* writer = (DngWriter*)env->GetDirectBufferAddress(javaHandler);
+        writer->bayergreensplit = greensplit;
+    }
 };
 
 
