@@ -989,10 +989,11 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
                 Log.WriteEx(ex);
                 SettingsManager.get(SettingKeys.M_Focus).setIsSupported(false);
             }
-            //create mf values
-            if (SettingsManager.get(SettingKeys.M_Focus).isSupported())
-                SettingsManager.get(SettingKeys.M_Focus).setValues(createManualFocusValues(min, max,step));
+
         }
+        //create mf values
+        if (SettingsManager.get(SettingKeys.M_Focus).isSupported())
+            SettingsManager.get(SettingKeys.M_Focus).setValues(createManualFocusValues(min, max,step));
 
     }
 
@@ -1018,7 +1019,7 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
     }
 
 
-
+    private LGCameraRef lgCamera = null;
     private Camera.Parameters getParameters(int currentcamera)
     {
         Camera camera = null;
@@ -1027,12 +1028,15 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
             case LG:
             {
                 Log.d(TAG,"Open LG Camera");
-                LGCameraRef lgCamera = null;
                 if (SettingsManager.get(SettingKeys.openCamera1Legacy).get())
                     lgCamera = new LGCameraRef(currentcamera, 256);
                 if (lgCamera == null)
                     lgCamera = new LGCameraRef(currentcamera);
-                return lgCamera.getParameters();
+                Camera.Parameters parameters = lgCamera.getCamera().getParameters();
+                lgCamera.getCamera().release();
+                lgCamera.release();
+                lgCamera = null;
+                return parameters;
             }
             case Moto_Ext:
             {
