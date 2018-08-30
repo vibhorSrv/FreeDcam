@@ -174,7 +174,10 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
                 dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
             else
                 dngProfile = getDngProfile(DngProfile.Plain, width, height, upshift);
-            rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, getExifInfo());
+            String jpegout = fileout.replace("dng", "ppm");
+            ExifInfo exifInfo = getExifInfo();
+            //rawStack.savePNG(dngProfile,dngProfile.matrixes,jpegout,exifInfo);
+            rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, exifInfo);
             rawStack = null;
             imageSaveExecutor.shutdown();
         }

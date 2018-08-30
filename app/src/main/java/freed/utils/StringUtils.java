@@ -66,6 +66,7 @@ public class StringUtils
         public static final String JPS = "jps";
         public static final String BAYER = "bayer";
         public static final String MP4 = "mp4";
+        public static final String PNG = "png";
 
         public String GetWithDot()
         {

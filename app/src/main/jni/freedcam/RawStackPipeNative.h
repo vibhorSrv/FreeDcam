@@ -1,8 +1,9 @@
 //
 // Created by troop on 21.06.2018.
 //
+#include "stage2_RawToRgb.h"
+#include "stage1_alignmerge.h"
 
-#include "mergstacka.h"
 #include "HalideBuffer.h"
 #include "DngProfile.h"
 #include "CustomMatrix.h"
@@ -18,6 +19,8 @@
 #define  LOG_TAG    "freedcam.RawStackPipeNative"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
 
+
+
 class RawStackPipeNative
 {
 public:
@@ -27,7 +30,7 @@ public:
     Halide::Runtime::Buffer<uint16_t> input_to_merge;
     Halide::Runtime::Buffer<uint16_t> output;
     uint16_t * inputdata, *mergedata, *outdata;
-    int widht;
+    int width;
     int height;
     int offset;
     OpCode * opCode =NULL;
@@ -36,7 +39,7 @@ public:
     void init(int width, int height, uint16_t * firstdata)
     {
         LOGD("init upshift %i", upshift);
-        this->widht = width;
+        this->width = width;
         this->height = height;
         offset = width*height;
         LOGD("init input");
@@ -67,12 +70,34 @@ public:
             inputdata[i+offset] = ((nextdata[i])<<upshift);
             mergedata[i+offset] = ((nextdata[i])<<upshift);
         }
-        mergstacka(input,input_to_merge,output);
+        stage1_alignmerge(input,input_to_merge,output);
         for (int i = 0; i < offset; ++i) {
             mergedata[i] = outdata[i];
         }
         //delete[] nextdata;
         LOGD("stackframedone");
+    }
+
+    void writeJpeg(DngProfile * profile, CustomMatrix * customMatrix, char* outfile, ExifInfo * exifInfo)
+    {
+        Halide::Runtime::Buffer<uint8_t> jpeg_output(width, height, 4);
+        stage2_RawToRgb(output,
+                        profile->blacklevel[0],
+                        profile->whitelevel,
+                        customMatrix->neutralColorMatrix[0],
+                        customMatrix->neutralColorMatrix[1],
+                        customMatrix->neutralColorMatrix[1],
+                        customMatrix->neutralColorMatrix[2],
+                        1.1,
+                        1.8,
+                        jpeg_output);
+
+        FILE *fp = fopen(outfile, "wb");
+        /* write header to the file */
+        /* write image data bytes to the file */
+        uint8_t * tmp = jpeg_output.data();
+        fwrite(tmp, sizeof(uint8_t), sizeof(tmp), fp);
+        fclose(fp);
     }
 
     void writeDng(DngProfile * profile, CustomMatrix * customMatrix, char* outfile, ExifInfo * exifInfo)
@@ -84,7 +109,7 @@ public:
         profile->rawType = 6;
         writer->dngProfile = profile;
         writer->bayerBytes = (unsigned char*) output.data();
-        writer->rawSize = widht*height*2;
+        writer->rawSize = width*height*2;
         writer->_make = "hdr+";
         writer->_model = "model";
         writer->fileSavePath = (char*)outfile;

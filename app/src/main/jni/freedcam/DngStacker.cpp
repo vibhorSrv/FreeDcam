@@ -12,7 +12,7 @@
 #include "CustomMatrix.h"
 #include "DngWriter.h"
 #include <string>
-#include "mergstacka.h"
+#include "stage1_alignmerge.h"
 #include "HalideBuffer.h"
 
 #define  LOG_TAG    "freedcam.DngStack"
@@ -97,6 +97,7 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     raw.imgdata.params.gamm[1] = 1.0; //-g 1 1
     raw.imgdata.params.output_tiff = 0;
     raw.imgdata.params.no_interpolation = 1;
+
     if ((ret = raw.open_file(files[0]) != LIBRAW_SUCCESS))
         return;
     LOGD("open raw");
@@ -198,7 +199,7 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
 
         LOGD("end copy algin to alignout");
         LOGD("start merge");
-        mergstacka(input,input_to_merge,output);
+        stage1_alignmerge(input,input_to_merge,output);
         LOGD("end merge");
         for (size_t t = 0; t <  offsetNextImg; t++)
         {

@@ -122,6 +122,7 @@ public class RawStackPipe extends PictureModuleApi2 {
                 rawStackCaptureHolder.writeDng(file);
             }
             fireOnWorkFinish(new File(file));
+            //fireOnWorkFinish(new File(file.replace("dng","ppm")));
         }
         finishCapture();
     }

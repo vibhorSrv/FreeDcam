@@ -115,7 +115,9 @@ public class BitmapHelper
         Bitmap response = null;
         if (response == null && file.exists())
         {
-            if (file.getAbsolutePath().toLowerCase().endsWith(FileEnding.JPG) || file.getAbsolutePath().toLowerCase().endsWith(FileEnding.JPS))
+            if (file.getAbsolutePath().toLowerCase().endsWith(FileEnding.JPG) ||
+                    file.getAbsolutePath().toLowerCase().endsWith(FileEnding.JPS) ||
+                    file.getAbsolutePath().toLowerCase().endsWith(FileEnding.PNG))
             {
                 Options options = new Options();
                 options.inSampleSize = 2;

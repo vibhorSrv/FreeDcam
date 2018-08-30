@@ -277,6 +277,7 @@ public class StorageFileManager
                                 || f.getName().toLowerCase().endsWith(StringUtils.FileEnding.BAYER)
                                 || f.getName().toLowerCase().endsWith(StringUtils.FileEnding.DNG)
                                 || f.getName().toLowerCase().endsWith(StringUtils.FileEnding.MP4)
+                                || f.getName().toLowerCase().endsWith(StringUtils.FileEnding.PNG)
                 ))
                     list.add(new FileHolder(f,external));
                 else if (formatsToShow == ActivityAbstract.FormatTypes.dng && f.getName().toLowerCase().endsWith(StringUtils.FileEnding.DNG))

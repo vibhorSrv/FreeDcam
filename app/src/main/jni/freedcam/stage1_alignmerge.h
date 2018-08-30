@@ -1,5 +1,5 @@
-#ifndef HALIDE__dngstack_h
-#define HALIDE__dngstack_h
+#ifndef HALIDE__stage1_alignmerge_h
+#define HALIDE__stage1_alignmerge_h
 #include <stdint.h>
 
 // Forward declarations of the types used in the interface
@@ -29,9 +29,9 @@ struct buffer_t;
 extern "C" {
 #endif
 
-int dngstack(struct halide_buffer_t *_p1_buffer, int32_t _p0, struct halide_buffer_t *_merge_spatial_output_buffer) HALIDE_FUNCTION_ATTRS;
-int dngstack_argv(void **args) HALIDE_FUNCTION_ATTRS;
-const struct halide_filter_metadata_t *dngstack_metadata() HALIDE_FUNCTION_ATTRS;
+int stage1_alignmerge(struct halide_buffer_t *_p1_buffer, struct halide_buffer_t *_p0_buffer, struct halide_buffer_t *_merge_spatial_output_buffer) HALIDE_FUNCTION_ATTRS;
+int stage1_alignmerge_argv(void **args) HALIDE_FUNCTION_ATTRS;
+const struct halide_filter_metadata_t *stage1_alignmerge_metadata() HALIDE_FUNCTION_ATTRS;
 
 
 // This allows the includer of this file to get the argv/metadata entry points
@@ -42,17 +42,17 @@ const struct halide_filter_metadata_t *dngstack_metadata() HALIDE_FUNCTION_ATTRS
 // HALIDE_GET_STANDARD_METADATA_FUNCTION -> _metadata() entry point).
 #ifdef HALIDE_GET_STANDARD_ARGV_FUNCTION
 inline int (*HALIDE_GET_STANDARD_ARGV_FUNCTION())(void**) {
-    return dngstack_argv;
+    return stage1_alignmerge_argv;
 }
 #endif
 #ifdef HALIDE_GET_STANDARD_METADATA_FUNCTION
 inline const struct halide_filter_metadata_t* (*HALIDE_GET_STANDARD_METADATA_FUNCTION())() {
-    return dngstack_metadata;
+    return stage1_alignmerge_metadata;
 }
 #endif
 
 
-int dngstack_old_buffer_t(struct buffer_t *_p1, int32_t _p0, struct buffer_t *_merge_spatial_output) HALIDE_FUNCTION_ATTRS;
+int stage1_alignmerge_old_buffer_t(struct buffer_t *_p1, struct buffer_t *_p0, struct buffer_t *_merge_spatial_output) HALIDE_FUNCTION_ATTRS;
 
 #ifdef __cplusplus
 }  // extern "C"
