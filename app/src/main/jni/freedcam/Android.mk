@@ -27,9 +27,8 @@ LOCAL_LDLIBS := -lz \
 	-landroid
 LOCAL_C_INCLUDES += \
 					$(NDK_APP_PROJECT_PATH)/tiff/libtiff/ \
-                    ../../libjpeg/jpeg-9b/ \
 
-LOCAL_STATIC_LIBRARIES := libtiff libraw libjpeg alignmerge rawtorgb
+LOCAL_STATIC_LIBRARIES := libtiff libraw alignmerge rawtorgb
 include $(BUILD_SHARED_LIBRARY)
 
 
