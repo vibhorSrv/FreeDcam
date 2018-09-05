@@ -95,8 +95,9 @@ public:
         FILE *fp = fopen(outfile, "wb");
         /* write header to the file */
         /* write image data bytes to the file */
-        uint8_t * tmp = jpeg_output.data();
-        fwrite(tmp, sizeof(uint8_t), sizeof(tmp), fp);
+        unsigned char * tmp = jpeg_output.data();
+        LOGD("write tmp %i", sizeof(tmp));
+        fwrite(tmp, sizeof(tmp), 1, fp);
         fclose(fp);
     }
 
