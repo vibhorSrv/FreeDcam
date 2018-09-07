@@ -479,18 +479,17 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
                 SettingsManager.get(SettingKeys.M_ExposureTime).setKEY("shutter-value");
                 SettingsManager.get(SettingKeys.M_ExposureTime).setType(SettingsManager.SHUTTER_MEIZU);
             }
-            //krillin shutter
-            else if (parameters.get("hw-manual-exposure-value") != null) {
-                Log.d(TAG, "ManualExposureTime Krilin");
-                SettingsManager.get(SettingKeys.M_ExposureTime).setIsSupported(true);
-                SettingsManager.get(SettingKeys.M_ExposureTime).setValues(SettingsManager.getInstance().getResources().getStringArray(R.array.shutter_values_krillin));
-                SettingsManager.get(SettingKeys.M_ExposureTime).setKEY("hw-manual-exposure-value");
-                SettingsManager.get(SettingKeys.M_ExposureTime).setType(SettingsManager.SHUTTER_KRILLIN);
-            }
-            else if (parameters.get("hw-max-exposure-time") != null) {
+            //kirin shutter
+            else if (parameters.get("hw-sensor-exposure-time-range") != null) {
                 Log.d(TAG, "ManualExposureTime huawei");
                 SettingsManager.get(SettingKeys.M_ExposureTime).setIsSupported(true);
-                SettingsManager.get(SettingKeys.M_ExposureTime).setValues(SettingsManager.getInstance().getResources().getStringArray(R.array.shutter_values_krillin));
+                String split[] = parameters.get("hw-sensor-exposure-time-range").split(",");//=1/4000,30"
+                String split2[] = split[0].split("/");
+                float a = (Float.parseFloat(split2[0]) / Float.parseFloat(split2[1])) * 1000000f;
+                long min =(long)a;
+                long max = Long.parseLong(split[1]) * 1000000;
+                String values[] = getSupportedShutterValues(min, max, true);
+                SettingsManager.get(SettingKeys.M_ExposureTime).setValues(values);
                 SettingsManager.get(SettingKeys.M_ExposureTime).setKEY("hw-sensor-exposure-time");
                 SettingsManager.get(SettingKeys.M_ExposureTime).setType(SettingsManager.SHUTTER_KRILLIN);
             }
@@ -756,6 +755,13 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
                     SettingsManager.get(SettingKeys.M_Saturation).setKEY(camstring(R.string.saturation));
                     SettingsManager.get(SettingKeys.M_Saturation).set(parameters.get(camstring(R.string.saturation)));
                 }
+                else if (parameters.get("saturation-values") != null)
+                {
+                    SettingsManager.get(SettingKeys.M_Saturation).setValues(parameters.get("saturation-values").split(","));
+                    SettingsManager.get(SettingKeys.M_Saturation).setKEY("saturation");
+                    SettingsManager.get(SettingKeys.M_Saturation).setIsSupported(true);
+                    SettingsManager.get(SettingKeys.M_Saturation).set("2");
+                }
                 Log.d(TAG, "Saturation Max:" + max);
                 if (max > 0) {
                     SettingsManager.get(SettingKeys.M_Saturation).setValues(createStringArray(min, max, 1));
@@ -797,6 +803,12 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
                     SettingsManager.get(SettingKeys.M_Sharpness).setKEY(camstring(R.string.sharpness));
                     SettingsManager.get(SettingKeys.M_Sharpness).set(parameters.get(camstring(R.string.sharpness)));
                 }
+                else if (parameters.get("sharpness-values") != null)
+                {
+                    SettingsManager.get(SettingKeys.M_Sharpness).setValues(parameters.get("sharpness-values").split(","));
+                    SettingsManager.get(SettingKeys.M_Sharpness).setKEY("sharpness");
+                    SettingsManager.get(SettingKeys.M_Sharpness).setIsSupported(true);
+                }
                 Log.d(TAG, "Sharpness Max:" +max);
                 if (max > 0) {
                     SettingsManager.get(SettingKeys.M_Sharpness).setValues(createStringArray(min, max, 1));
@@ -833,6 +845,13 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
                     min = Integer.parseInt(parameters.get(camstring(R.string.min_brightness)));
                     max = Integer.parseInt(parameters.get(camstring(R.string.max_brightness)));
                     Log.d(TAG, "Brightness: Default");
+                }
+                else if (parameters.get("brightness-values") != null)
+                {
+                    SettingsManager.get(SettingKeys.M_Brightness).setValues(parameters.get("brightness-values").split(","));
+                    SettingsManager.get(SettingKeys.M_Brightness).setKEY("brightness");
+                    SettingsManager.get(SettingKeys.M_Brightness).setIsSupported(true);
+                    SettingsManager.get(SettingKeys.M_Brightness).set("2");
                 }
                 Log.d(TAG, "Brightness Max:" + max);
                 if (max > 0) {
@@ -873,6 +892,13 @@ public class Camera1FeatureDetectorTask extends AbstractFeatureDetectorTask
                     min = Integer.parseInt(parameters.get(camstring(R.string.min_contrast)));
                     max = Integer.parseInt(parameters.get(camstring(R.string.max_contrast)));
 
+                }
+                else if (parameters.get("contrast-values") != null)
+                {
+                    SettingsManager.get(SettingKeys.M_Contrast).setValues(parameters.get("contrast-values").split(","));
+                    SettingsManager.get(SettingKeys.M_Contrast).setKEY("contrast"); // constrast is not a typo. on huawei side it is
+                    SettingsManager.get(SettingKeys.M_Contrast).setIsSupported(true);
+                    SettingsManager.get(SettingKeys.M_Contrast).set("2");
                 }
                 Log.d(TAG, "Contrast Max:" +max);
                 if (max > 0) {
