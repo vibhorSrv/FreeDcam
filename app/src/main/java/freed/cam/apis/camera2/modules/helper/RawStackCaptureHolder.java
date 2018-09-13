@@ -19,12 +19,14 @@ import java.nio.ByteBuffer;
 import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import freed.ActivityInterface;
 import freed.cam.apis.basecamera.modules.ModuleInterface;
 import freed.cam.apis.basecamera.modules.WorkFinishEvents;
+import freed.cam.ui.themesample.handler.UserMessageHandler;
 import freed.dng.DngProfile;
 import freed.jni.ExifInfo;
 import freed.jni.RawStack;
@@ -36,17 +38,12 @@ import freed.utils.Log;
 public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     private final static String TAG = RawStackCaptureHolder.class.getSimpleName();
-
-    private final BlockingQueue<Runnable> imagesToSaveQueue;
-    private final ThreadPoolExecutor imageSaveExecutor;
-    private final int KEEP_ALIVE_TIME = 500;
-
+    private final BlockingQueue<Image> imageBlockingQueue;
+    private StackRunner stackRunner;
     private RawStack rawStack;
-
     public int getStackCoutn() {
         return stackCoutn;
     }
-
     private int stackCoutn = 0;
     private int width;
     private int height;
@@ -56,25 +53,12 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
         super(characteristicss, isRawCapture, isJpgCapture, activitiy, imageSaver, finish, rdyToSaveImg);
-        imagesToSaveQueue = new ArrayBlockingQueue<>(4);
+        imageBlockingQueue = new LinkedBlockingQueue<>(4);
 
-        imageSaveExecutor = new ThreadPoolExecutor(
-                1,       // Initial pool size
-                1,       // Max pool size
-                KEEP_ALIVE_TIME,
-                TimeUnit.MILLISECONDS,
-                imagesToSaveQueue);
-        //handel case that queue is full, and wait till its free
-        imageSaveExecutor.setRejectedExecutionHandler((r, executor) -> {
-            Log.d(TAG, "imageSave Queue full");
-            try {
-                executor.getQueue().put(r);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        });
         rawStack =new RawStack();
         stackCoutn = 0;
+        stackRunner = new StackRunner();
+        new Thread(stackRunner).start();
         //use freedcam dng converter
         if (SettingsManager.get(SettingKeys.forceRawToDng).get())
         {
@@ -101,17 +85,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
 
     @Override
     public void onImageAvailable(ImageReader reader) {
-        Log.d(TAG, "OnRawAvailible waiting: " + imageSaveExecutor.getActiveCount());
-        synchronized (RawStackCaptureHolder.class)
-        {
-            while (imagesToSaveQueue.remainingCapacity() == 1) {
-                try {
-                    RawStackCaptureHolder.class.wait();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
+        Log.d(TAG, "OnRawAvailible waiting: ");
 
         final Image image = reader.acquireLatestImage();
         if (image == null)
@@ -119,43 +93,59 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
         if (image.getFormat() != ImageFormat.RAW_SENSOR)
             image.close();
         else {
-            /*ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            final byte[] bytes = new byte[buffer.remaining()];
-            rawsize = bytes.length;
-            buffer.get(bytes);*/
-            Log.d(TAG, "add image to Queue left:" + imagesToSaveQueue.remainingCapacity());
+            Log.d(TAG, "add image to Queue left:" + imageBlockingQueue.remainingCapacity());
+            try {
+                imageBlockingQueue.put(image);
+            } catch (InterruptedException e) {
+                Log.WriteEx(e);
+            }
             rdyToSaveImg.onRdyToSaveImg(RawStackCaptureHolder.this);
-            imageSaveExecutor.execute(new StackRunner(image));
         }
 
     }
 
     private class StackRunner implements Runnable
     {
-        private final  Image image;
-        public StackRunner(Image image)
+        //private final  Image image;
+        boolean run = false;
+        public StackRunner()
         {
-            this.image  = image;
+            run = true;
         }
+
+        public void stop(){ run = false; }
 
         @Override
         public void run() {
 
-            final ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-            final int w = image.getWidth();
-            final int h = image.getHeight();
-            rawsize = buffer.remaining();
-            Log.d(TAG, "stackframes");
-            if (stackCoutn == 0) {
-                rawStack.setFirstFrame(buffer, w, h);
-            } else
-                rawStack.stackNextFrame(buffer);
-            stackCoutn++;
-            image.close();
-            buffer.clear();
-            Log.d(TAG, "stackframes done");
-            synchronized (RawStackCaptureHolder.class) {
-                RawStackCaptureHolder.class.notify();
+            Image image = null;
+            while (run) {
+                try {
+                    image = imageBlockingQueue.take();
+                } catch (InterruptedException e) {
+                    Log.WriteEx(e);
+                }
+                final ByteBuffer buffer = image.getPlanes()[0].getBuffer();
+                final int w = image.getWidth();
+                final int h = image.getHeight();
+
+                Log.d(TAG, "stackframes");
+                if (stackCoutn == 0) {
+
+                    rawStack.setFirstFrame(buffer, w, h);
+                    rawsize = buffer.remaining();
+
+                } else
+                    rawStack.stackNextFrame(buffer);
+
+                image.close();
+                buffer.clear();
+                stackCoutn++;
+                UserMessageHandler.sendMSG("Stacked:" +stackCoutn,false);
+                Log.d(TAG, "stackframes done " + stackCoutn);
+                synchronized (RawStackCaptureHolder.class) {
+                    RawStackCaptureHolder.class.notify();
+                }
             }
         }
     }
@@ -175,11 +165,13 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
             else
                 dngProfile = getDngProfile(DngProfile.Plain, width, height, upshift);
             String jpegout = fileout.replace("dng", "ppm");
+
             ExifInfo exifInfo = getExifInfo();
+            //String jpegout = fileout.replace("dng", "ppm");
             //rawStack.savePNG(dngProfile,dngProfile.matrixes,jpegout,exifInfo);
             rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, exifInfo);
             rawStack = null;
-            imageSaveExecutor.shutdown();
+            stackRunner.stop();
         }
         else
         {
@@ -198,7 +190,6 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
                 final Size outSize = new Size(width,height);
 
                 final ByteBuffer outbuffer = ByteBuffer.wrap(rawStack.getOutputBuffer());
-                int sss = outbuffer.remaining();
                 dngCreator.writeByteBuffer(new FileOutputStream(fileout),outSize,outbuffer,0);
                 outbuffer.clear();
             } catch (IOException e) {
@@ -206,7 +197,7 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
             }
             dngCreator.close();
             rawStack = null;
-            imageSaveExecutor.shutdown();
+            stackRunner.stop();
         }
     }
 
