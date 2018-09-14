@@ -164,7 +164,6 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
                 dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
             else
                 dngProfile = getDngProfile(DngProfile.Plain, width, height, upshift);
-            String jpegout = fileout.replace("dng", "ppm");
 
             ExifInfo exifInfo = getExifInfo();
             //String jpegout = fileout.replace("dng", "ppm");

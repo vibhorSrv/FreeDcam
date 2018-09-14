@@ -56,8 +56,8 @@ public:
         outdata = output.data();
         LOGD("copy data");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i] = ((firstdata[i])<<upshift);
-            mergedata[i] = ((firstdata[i])<<upshift);
+            inputdata[i] = ((firstdata[i] )<<upshift)+64;
+            mergedata[i] = ((firstdata[i] )<<upshift)+64;
         }
         LOGD("init done");
         //delete[] firstdata;
@@ -67,8 +67,8 @@ public:
     {
         LOGD("stackframe");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i+offset] = ((nextdata[i])<<upshift);
-            mergedata[i+offset] = ((nextdata[i])<<upshift);
+            inputdata[i+offset] = ((nextdata[i])<<upshift)+64;
+            mergedata[i+offset] = ((nextdata[i])<<upshift)+64;
         }
         stage1_alignmerge(input,input_to_merge,output);
         for (int i = 0; i < offset; ++i) {
@@ -109,6 +109,10 @@ public:
         writer->exifInfo = exifInfo;
         profile->rawType = 6;
         writer->dngProfile = profile;
+        writer->dngProfile->blacklevel[0] += 64;
+        writer->dngProfile->blacklevel[1] += 64;
+        writer->dngProfile->blacklevel[2] += 64;
+        writer->dngProfile->blacklevel[3] += 64;
         writer->bayerBytes = (unsigned char*) output.data();
         writer->rawSize = width*height*2;
         writer->_make = "hdr+";

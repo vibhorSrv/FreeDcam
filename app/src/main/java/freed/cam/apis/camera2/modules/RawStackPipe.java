@@ -20,6 +20,7 @@ import freed.settings.SettingKeys;
 import freed.settings.SettingsManager;
 import freed.utils.Log;
 
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class RawStackPipe extends PictureModuleApi2 {
 
     private final static String TAG = RawStackPipe.class.getSimpleName();
@@ -40,7 +41,13 @@ public class RawStackPipe extends PictureModuleApi2 {
         return "HDR+";
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    @Override
+    public void DoWork() {
+        if(!isWorking)
+            mBackgroundHandler.post(()->TakePicture());
+    }
+
+
     @Override
     protected void TakePicture() {
         rawStackCaptureHolder = new RawStackCaptureHolder(cameraHolder.characteristics, true, false, cameraUiWrapper.getActivityInterface(),this,this, this);
