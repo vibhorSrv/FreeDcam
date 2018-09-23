@@ -36,6 +36,8 @@ public:
     OpCode * opCode =NULL;
     int upshift = 0;
 
+    int bl = 0;
+
     void init(int width, int height, uint16_t * firstdata)
     {
         LOGD("init upshift %i", upshift);
@@ -56,8 +58,14 @@ public:
         outdata = output.data();
         LOGD("copy data");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i] = ((firstdata[i] )<<upshift)+64;
-            mergedata[i] = ((firstdata[i] )<<upshift)+64;
+            if(upshift > 0) {
+                inputdata[i] = ((firstdata[i]) << upshift) + bl;
+                mergedata[i] = ((firstdata[i]) << upshift) + bl;
+            } else
+            {
+                inputdata[i] = ((firstdata[i]) << upshift);
+                mergedata[i] = ((firstdata[i]) << upshift);
+            }
         }
         LOGD("init done");
         //delete[] firstdata;
@@ -67,8 +75,13 @@ public:
     {
         LOGD("stackframe");
         for (int i = 0; i < offset; ++i) {
-            inputdata[i+offset] = ((nextdata[i])<<upshift)+64;
-            mergedata[i+offset] = ((nextdata[i])<<upshift)+64;
+            if(upshift > 0) {
+                inputdata[i + offset] = ((nextdata[i]) << upshift) + bl;
+                mergedata[i + offset] = ((nextdata[i]) << upshift) + bl;
+            } else{
+                inputdata[i + offset] = ((nextdata[i]) << upshift);
+                mergedata[i + offset] = ((nextdata[i]) << upshift);
+            }
         }
         stage1_alignmerge(input,input_to_merge,output);
         for (int i = 0; i < offset; ++i) {
@@ -109,10 +122,13 @@ public:
         writer->exifInfo = exifInfo;
         profile->rawType = 6;
         writer->dngProfile = profile;
-        writer->dngProfile->blacklevel[0] += 64;
-        writer->dngProfile->blacklevel[1] += 64;
-        writer->dngProfile->blacklevel[2] += 64;
-        writer->dngProfile->blacklevel[3] += 64;
+        if(upshift > 0)
+        {
+            writer->dngProfile->blacklevel[0] += bl;
+            writer->dngProfile->blacklevel[1] += bl;
+            writer->dngProfile->blacklevel[2] += bl;
+            writer->dngProfile->blacklevel[3] += bl;
+        }
         writer->bayerBytes = (unsigned char*) output.data();
         writer->rawSize = width*height*2;
         writer->_make = "hdr+";
