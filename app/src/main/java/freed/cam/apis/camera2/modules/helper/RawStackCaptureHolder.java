@@ -199,43 +199,4 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
             stackRunner.stop();
         }
     }
-
-    private ExifInfo getExifInfo()
-    {
-        float fnum, focal = 0;
-        int iso;
-        float exposureTime;
-        float expoindex;
-        try {
-            focal = (captureResult.get(CaptureResult.LENS_FOCAL_LENGTH));
-        } catch (NullPointerException e) {
-            Log.WriteEx(e);
-        }
-        try {
-            fnum =(captureResult.get(CaptureResult.LENS_APERTURE));
-        } catch (NullPointerException e) {
-            Log.WriteEx(e);
-            fnum = 1.2f;
-        }
-        try {
-            iso = (captureResult.get(CaptureResult.SENSOR_SENSITIVITY));
-        } catch (NullPointerException e) {
-            Log.WriteEx(e);
-            iso =(100);
-        }
-        try {
-            double mExposuretime = captureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME).doubleValue() / 1000000000;
-            exposureTime = ((float) mExposuretime);
-        } catch (NullPointerException e) {
-            Log.WriteEx(e);
-            exposureTime = 0;
-        }
-        try {
-             expoindex = (captureResult.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION) * characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue());
-        } catch (NullPointerException e) {
-            Log.WriteEx(e);
-            expoindex = 0;
-        }
-        return new ExifInfo(iso,0,exposureTime,focal,fnum,expoindex,"",orientation+"");
-    }
 }

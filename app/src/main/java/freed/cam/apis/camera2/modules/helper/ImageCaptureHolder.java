@@ -33,6 +33,7 @@ import freed.image.ImageManager;
 import freed.image.ImageSaveTask;
 import freed.image.ImageTask;
 import freed.image.ImageTaskDngConverter;
+import freed.jni.ExifInfo;
 import freed.jni.OpCode;
 import freed.settings.SettingKeys;
 import freed.settings.SettingsManager;
@@ -79,6 +80,8 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
     private ModuleInterface moduleInterface;
 
     WorkFinishEvents workerfinish;
+    private DngProfile prof;
+    int witdh, height;
 
     public ImageCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg)
     {
@@ -93,6 +96,10 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
         customMatrix = null;
     }
 
+    public DngProfile getDngProfile(int upscaled)
+    {
+        return getDngProfile(DngProfile.Plain,witdh,height,upscaled);
+    }
 
     public void setCustomMatrix(CustomMatrix custmMat)
     {
@@ -177,6 +184,8 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
         Log.d(TAG, "OnRawAvailible, in buffer: " + images.size());
         try {
             img = reader.acquireLatestImage();
+            witdh = img.getWidth();
+            height = img.getHeight();
             if (isJpgCapture && img.getFormat() == ImageFormat.JPEG) {
                 AddImage(img);
                 Log.d(TAG,"Add Jpeg");
@@ -185,7 +194,7 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
                 AddImage(img);
                 Log.d(TAG,"Add raw");
             }
-            else if (!isJpgCapture && !isRawCapture) {
+            else if (!isJpgCapture && !isRawCapture && (img.getFormat() == ImageFormat.RAW_SENSOR || img.getFormat() == ImageFormat.RAW10)) {
                 AddImage(img);
                 Log.d(TAG,"Add bayer");
             }
@@ -250,33 +259,40 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
         characteristics = null;
         activityInterface = null;
         moduleInterface = null;
+        prof = null;
     }
 
 
     private void saveImage(Image image,String f) {
+        Log.d(TAG, "saveImage");
         File file = null;
         ImageTask task = null;
         switch (image.getFormat())
         {
             case ImageFormat.JPEG:
+                Log.d(TAG, "save jpg");
                 file = new File(f+".jpg");
                 task = process_jpeg(image, file);
                 break;
             case ImageFormat.RAW10:
+                Log.d(TAG, "save 10bit dng");
                 file = new File(f+".dng");
                 task = process_rawWithDngConverter(image, DngProfile.Mipi,file);
                 break;
             case ImageFormat.RAW12:
+                Log.d(TAG, "save 12bit dng");
                 file = new File(f+".dng");
                 task = process_rawWithDngConverter(image,DngProfile.Mipi12,file);
                 break;
             default:
                 if (!isRawCapture && !isJpgCapture)
                 {
+                    Log.d(TAG, "save bayer");
                     file = new File(f + ".bayer");
                     task = process_jpeg(image,file);
                 }
                 else {
+                    Log.d(TAG, "save dng");
                     file = new File(f + ".dng");
                     if (forceRawToDng)
                         if (support12bitRaw)
@@ -388,7 +404,6 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
 
 
 
-        DngProfile prof = null;
         if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(bytes.length) != null)
             prof = SettingsManager.getInstance().getDngProfilesMap().get(bytes.length);
         else
@@ -644,6 +659,45 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
                 Log.d(TAG,"ImageFormat:JPEG");
                 break;
         }
+    }
+
+    public ExifInfo getExifInfo()
+    {
+        float fnum, focal = 0;
+        int iso;
+        float exposureTime;
+        float expoindex;
+        try {
+            focal = (captureResult.get(CaptureResult.LENS_FOCAL_LENGTH));
+        } catch (NullPointerException e) {
+            Log.WriteEx(e);
+        }
+        try {
+            fnum =(captureResult.get(CaptureResult.LENS_APERTURE));
+        } catch (NullPointerException e) {
+            Log.WriteEx(e);
+            fnum = 1.2f;
+        }
+        try {
+            iso = (captureResult.get(CaptureResult.SENSOR_SENSITIVITY));
+        } catch (NullPointerException e) {
+            Log.WriteEx(e);
+            iso =(100);
+        }
+        try {
+            double mExposuretime = captureResult.get(CaptureResult.SENSOR_EXPOSURE_TIME).doubleValue() / 1000000000;
+            exposureTime = ((float) mExposuretime);
+        } catch (NullPointerException e) {
+            Log.WriteEx(e);
+            exposureTime = 0;
+        }
+        try {
+            expoindex = (captureResult.get(CaptureResult.CONTROL_AE_EXPOSURE_COMPENSATION) * characteristics.get(CameraCharacteristics.CONTROL_AE_COMPENSATION_STEP).floatValue());
+        } catch (NullPointerException e) {
+            Log.WriteEx(e);
+            expoindex = 0;
+        }
+        return new ExifInfo(iso,0,exposureTime,focal,fnum,expoindex,"",orientation+"");
     }
 
 }

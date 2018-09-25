@@ -76,7 +76,7 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
     private int mState = STATE_PICTURE_TAKEN;
     private long mCaptureTimer;
     private static final long PRECAPTURE_TIMEOUT_MS = 1000;
-    private ImageCaptureHolder currentCaptureHolder;
+    protected ImageCaptureHolder currentCaptureHolder;
     private final int MAX_IMAGES = 8;
     protected List<File> filesSaved;
 
@@ -321,7 +321,7 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
             captureJpeg = false;
         }
         else if (picFormat.equals(SettingsManager.getInstance().getResString(R.string.pictureformat_bayer))) {
-            Log.d(TAG, "ImageReader RAW12");
+            Log.d(TAG, "ImageReader BAYER");
             captureDng = false;
             captureJpeg = false;
         }
@@ -445,12 +445,10 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
             rawReader.setOnImageAvailableListener(currentCaptureHolder,mBackgroundHandler);
         }
 
-        //cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
-        //cameraUiWrapper.captureSessionHandler.CancelRepeatingCaptureSession();
         prepareCaptureBuilder(BurstCounter.getImageCaptured());
         changeCaptureState(CaptureStates.image_capture_start);
         Log.d(TAG, "StartStillCapture");
-        cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
+        //cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
         cameraUiWrapper.captureSessionHandler.StartImageCapture(currentCaptureHolder, mBackgroundHandler);
     }
 
@@ -527,7 +525,7 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
         }
     }
 
-    private void onSesssionRdy()
+    protected void onSesssionRdy()
     {
         Log.d(TAG, "onSessionRdy() ######################### Rdy to Start Preview, CAPTURE CYCLE DONE #####################");
         cameraUiWrapper.captureSessionHandler.StartRepeatingCaptureSession();

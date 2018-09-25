@@ -112,6 +112,14 @@ public class StorageFileManager
         return builder.toString();
     }
 
+    public String getFreedcamFolder()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append(internalSD.getAbsolutePath());
+        builder.append(freedcamFolder);
+        return builder.toString();
+    }
+
     public String getNewFilePathBurst(boolean externalSd, String fileEnding, int hdrcount)
     {
         StringBuilder builder = new StringBuilder();

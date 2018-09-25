@@ -36,7 +36,7 @@ public:
     OpCode * opCode =NULL;
     int upshift = 0;
 
-    int bl = 0;
+    int bl = 64;
 
     void init(int width, int height, uint16_t * firstdata)
     {
