@@ -76,7 +76,6 @@ public class CaptureSessionHandler
             {
                 // When the session is ready, we start displaying the previewSize.
                 mCaptureSession = cameraCaptureSession;
-
                 try {
                     // Finally, we start displaying the camera preview.
                     mCaptureSession.setRepeatingRequest(mPreviewRequestBuilder.build(),
@@ -593,6 +592,10 @@ public class CaptureSessionHandler
             Log.WriteEx(ex);
         }
         catch (IllegalStateException ex)
+        {
+            Log.WriteEx(ex);
+        }
+        catch (NullPointerException ex)
         {
             Log.WriteEx(ex);
         }

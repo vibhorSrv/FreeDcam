@@ -24,7 +24,7 @@ import freed.utils.Log;
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class AeManagerCamera2 extends AeManager {
 
-    public final static long MAX_PREVIEW_EXPOSURETIME = 100000000;
+    public final static long MAX_PREVIEW_EXPOSURETIME = 800000000;
 
     protected Camera2Fragment cameraUiWrapper;
     private AeModeApi2 aeModeApi2;
@@ -46,7 +46,7 @@ public class AeManagerCamera2 extends AeManager {
             Log.d(manualExposureTime.TAG, "ExposureTimeToSet:" + val);
             cameraUiWrapper.captureSessionHandler.SetCaptureParameter(CaptureRequest.SENSOR_EXPOSURE_TIME,val);
             if (val > MAX_PREVIEW_EXPOSURETIME && !SettingsManager.getInstance().GetCurrentModule().equals(cameraUiWrapper.getResString(R.string.module_video))) {
-                Log.d(manualExposureTime.TAG, "ExposureTime Exceed 100000000 for preview, set it to 100000000");
+                Log.d(manualExposureTime.TAG, "ExposureTime Exceed "+MAX_PREVIEW_EXPOSURETIME+" for preview, set it to "+MAX_PREVIEW_EXPOSURETIME);
                 val = MAX_PREVIEW_EXPOSURETIME;
             }
 

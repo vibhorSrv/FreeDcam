@@ -94,34 +94,60 @@ public class RawStackPipe2 extends PictureModuleApi2 {
             }
             if (BurstCounter.getBurstCount() == BurstCounter.getImageCaptured()) {
                 Log.d(TAG, "internalFireOnWorkDone Burst done");
-                try {
-                    byte[] input = RawToDng.readFile(filesSaved.get(0));
-                    if (input != null)
-                        Log.d(TAG, "input size: " + input.length);
-                    DngProfile dngProfile = currentCaptureHolder.getDngProfile(0);
-                    RawStack rawStack = new RawStack();
-                    rawStack.setFirstFrame(input, dngProfile.getWidth(),dngProfile.getHeight());
 
-                    for (int i = 1; i< filesSaved.size(); i++)
-                    {
-                        byte[] nextinput = RawToDng.readFile(filesSaved.get(i));
-                        rawStack.stackNextFrame(nextinput);
-                        UserMessageHandler.sendMSG("Stacked:" +i,false);
+                new Thread(() -> {
+                    try {
+                        byte[] input = RawToDng.readFile(filesSaved.get(0));
+                        if (input != null)
+                            Log.d(TAG, "input size: " + input.length);
+                        RawStack rawStack = new RawStack();
+                        int upshift;
+                        if (SettingsManager.get(SettingKeys.forceRawToDng).get())
+                        {
+                            //if input data is 12bit only scale it by 2, else it would clip high/lights = 14bit
+                            if (SettingsManager.get(SettingKeys.support12bitRaw).get())
+                                upshift = 2;
+                            else //shift 10bit input up to 14bit
+                                upshift = 4;
+                        }
+                        else //use stock dngcreator, dont scale it up till we found a way to manipulate black and whitelvl from the capture result
+                            upshift = 0;
+
+                        DngProfile dngProfile;
+                        if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(input.length) != null)
+                            dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(input.length);
+                        else
+                            dngProfile = currentCaptureHolder.getDngProfile(upshift);
+
+                        if (SettingsManager.get(SettingKeys.MATRIX_SET).get() == null ||SettingsManager.get(SettingKeys.MATRIX_SET).get().equals(SettingsManager.getInstance().getResString(R.string.off_)))
+                            dngProfile.matrixes = currentCaptureHolder.getMatrix();
+                        else
+                            dngProfile.matrixes = SettingsManager.getInstance().getMatrixesMap().get(SettingsManager.get(SettingKeys.MATRIX_SET).get());
+
+
+                        rawStack.setShift(upshift);
+                        rawStack.setFirstFrame(input, dngProfile.getWidth(), dngProfile.getHeight());
+
+                        for (int i = 1; i < filesSaved.size(); i++) {
+                            byte[] nextinput = RawToDng.readFile(filesSaved.get(i));
+                            rawStack.stackNextFrame(nextinput);
+                            UserMessageHandler.sendMSG("Stacked:" + i, false);
+                        }
+
+
+                        ExifInfo exifInfo = currentCaptureHolder.getExifInfo();
+                        String fileout = cameraUiWrapper.getActivityInterface().getStorageHandler().getNewFilePath(SettingsManager.getInstance().GetWriteExternal(), "") + ".dng";
+                        rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, exifInfo);
+                        fireOnWorkFinish(new File(fileout));
+                        for (File filetodel : filesSaved) {
+                            filetodel.delete();
+                        }
+                        filesSaved.clear();
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
+                }).start();
 
-
-                    ExifInfo exifInfo = currentCaptureHolder.getExifInfo();
-                    String fileout = cameraUiWrapper.getActivityInterface().getStorageHandler().getNewFilePath(SettingsManager.getInstance().GetWriteExternal(),"")+".dng";
-                    rawStack.saveDng(dngProfile, dngProfile.matrixes, fileout, exifInfo);
-                    fireOnWorkFinish(new File(fileout));
-                    for (File filetodel : filesSaved)
-                    {
-                        filetodel.delete();
-                    }
-                    filesSaved.clear();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
 
             }
         }

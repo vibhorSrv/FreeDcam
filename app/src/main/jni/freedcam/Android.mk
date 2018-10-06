@@ -8,6 +8,11 @@ LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/stage1_alignmerge.a
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
+LOCAL_MODULE    := align_merge
+LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/stage1_align_merge.a
+include $(PREBUILT_STATIC_LIBRARY)
+
+include $(CLEAR_VARS)
 LOCAL_MODULE    := rawtorgb
 LOCAL_SRC_FILES :=  $(TARGET_ARCH_ABI)/stage2_RawToRgb.a
 include $(PREBUILT_STATIC_LIBRARY)
@@ -28,7 +33,7 @@ LOCAL_LDLIBS := -lz \
 LOCAL_C_INCLUDES += \
 					$(NDK_APP_PROJECT_PATH)/tiff/libtiff/ \
 
-LOCAL_STATIC_LIBRARIES := libtiff libraw alignmerge rawtorgb
+LOCAL_STATIC_LIBRARIES := libtiff libraw alignmerge align_merge rawtorgb
 include $(BUILD_SHARED_LIBRARY)
 
 

@@ -17,7 +17,7 @@ public class DngStack
         System.loadLibrary("freedcam");
     }
 
-    private static native void startStack(String[] filesToStack,String outputFile);
+    private static native void startStack(String[] filesToStack,String outputFile, String tmpfolder[]);
 
     private final String[] dngToStack;
 
@@ -31,7 +31,16 @@ public class DngStack
         File file = new File(dngToStack[0]);
         File out = file.getParentFile();
         out = new File(out.getAbsolutePath() + "/" + file.getName() + "_Stack.dng");
-        startStack(dngToStack,out.getAbsolutePath());
+        File tmpfolder = new File(out.getParentFile().getAbsoluteFile()+"/tmp");
+        if (!tmpfolder.exists())
+            tmpfolder.mkdirs();
+        int stacktmpsize = dngToStack.length/5;
+        String tmpfiles[] = new String[stacktmpsize];
+        for (int i = 0; i < stacktmpsize; i++)
+        {
+            tmpfiles[i] = tmpfolder.getAbsolutePath() +"/stack" + i;
+        }
+        startStack(dngToStack , out.getAbsolutePath(), tmpfiles);
         MediaScannerManager.ScanMedia(context,out);
     }
 }

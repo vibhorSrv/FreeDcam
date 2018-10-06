@@ -549,6 +549,50 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
         return profile;
     }
 
+    public CustomMatrix getMatrix()
+    {
+        float[] color2;
+        float[] color1;
+        float[] neutral = new float[3];
+        float[] forward2 = null;
+        float[] forward1 = null;
+        float[] reduction1 = null;
+        float[] reduction2 = null;
+        double[]finalnoise = null;
+        color1 = getFloatMatrix(characteristics.get(CameraCharacteristics.SENSOR_COLOR_TRANSFORM1));
+        color2 = getFloatMatrix(characteristics.get(CameraCharacteristics.SENSOR_COLOR_TRANSFORM2));
+        Rational[] n = captureResult.get(CaptureResult.SENSOR_NEUTRAL_COLOR_POINT);
+        neutral[0] = n[0].floatValue();
+        neutral[1] = n[1].floatValue();
+        neutral[2] = n[2].floatValue();
+        try {
+            forward2  = getFloatMatrix(characteristics.get(CameraCharacteristics.SENSOR_FORWARD_MATRIX2));
+        } catch (NullPointerException e) {
+            Log.WriteEx(e);
+            forward2 = null;
+        }
+        try {
+            forward1  = getFloatMatrix(characteristics.get(CameraCharacteristics.SENSOR_FORWARD_MATRIX1));
+        } catch (Exception e) {
+            Log.WriteEx(e);
+            forward1 = null;
+        }
+        try {
+            reduction1 = getFloatMatrix(characteristics.get(CameraCharacteristics.SENSOR_CALIBRATION_TRANSFORM1));
+        } catch (Exception e) {
+            Log.WriteEx(e);
+            reduction1 = null;
+        }
+        try {
+            reduction2 = getFloatMatrix(characteristics.get(CameraCharacteristics.SENSOR_CALIBRATION_TRANSFORM2));
+        } catch (Exception e) {
+            Log.WriteEx(e);
+            reduction2 = null;
+        }
+
+        return new CustomMatrix(color1,color2,neutral,forward1,forward2,reduction1,reduction2,null);
+    }
+
     private void getNoiseMatrix(int[] cfaOut, double[] finalnoise) {
         //noise
         Pair[] p = captureResult.get(CaptureResult.SENSOR_NOISE_PROFILE);

@@ -12,7 +12,7 @@
 #include "CustomMatrix.h"
 #include "DngWriter.h"
 #include <string>
-#include "stage1_alignmerge.h"
+#include "stage1_align_merge.h"
 #include "HalideBuffer.h"
 
 #define  LOG_TAG    "freedcam.DngStack"
@@ -20,7 +20,7 @@
 
 extern "C"
 {
-JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile);
+JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile, jobjectArray tmpfiles);
 }
 
 
@@ -65,21 +65,72 @@ void copyMatrix(float* dest, float colormatrix[4])
     }
 }
 
-
-JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile)
+void writeBinaryFile(uint16_t * data, int size, const char * file)
 {
+    FILE *filep = fopen(file,"wb");
+    fwrite(data, size, 1, filep);
+
+    //fwrite(&data, size, 1, filep);
+    fclose(filep);
+}
+
+uint16_t * readBinaryFile(const char *name)
+{
+    FILE *file;
+    uint16_t *buffer;
+    unsigned long fileLen;
+
+    //Open file
+    file = fopen(name, "rb");
+    if (!file)
+    {
+        fprintf(stderr, "Unable to open file %s", name);
+
+    }
+
+    //Get file length
+    fseek(file, 0, SEEK_END);
+    fileLen=ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    //Allocate memory
+    buffer=(uint16_t *)malloc(fileLen+1);
+    if (!buffer)
+    {
+        fprintf(stderr, "Memory error!");
+        fclose(file);
+
+    }
+
+    //Read file contents into buffer
+    fread(buffer, fileLen, 1, file);
+    fclose(file);
+
+    //Do what ever with buffer
+
+    return buffer;
+}
 
 
+JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile, jobjectArray tmpfiles)
+{
 
     int stringCount = (*env).GetArrayLength(filesToStack);
     int width,height, outputcount;
     const char * files[stringCount];
     const char * outfile =(*env).GetStringUTFChars( outputfile, NULL);
+    int stacktostackfilecount = (*env).GetArrayLength(filesToStack);
+    const char * stacktostackfiles[stacktostackfilecount];
 
     LOGD("FilesToReadCount: %i", stringCount);
     for (int i=0; i<stringCount; i++) {
         jstring string = (jstring) (*env).GetObjectArrayElement(filesToStack, i);
         files[i] = (*env).GetStringUTFChars( string, NULL);
+    }
+
+    for (int i=0; i<stacktostackfilecount; i++) {
+        jstring string = (jstring) (*env).GetObjectArrayElement(tmpfiles, i);
+        stacktostackfiles[i] = (*env).GetStringUTFChars( string, NULL);
     }
 
 
@@ -108,22 +159,14 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     height = (int)raw.imgdata.sizes.raw_height;
     DngProfile * dngprofile =new DngProfile();
     CustomMatrix * matrix = new CustomMatrix();
-    Halide::Runtime::Buffer<uint16_t> input(width, height, 2);
-    Halide::Runtime::Buffer<uint16_t> input_to_merge(width, height, 2);
+    Halide::Runtime::Buffer<uint16_t> input(width, height, 5);
 
     Halide::Runtime::Buffer<uint16_t> output(width, height, 1);
 
     uint16_t * inputdata = input.data();
-    uint16_t * input_to_mergedata = input_to_merge.data();
     uint16_t * out = output.data();
     int offsetNextImg = width*height;
 
-    for (size_t i = 0; i <  width *  height; i++)
-    {
-        inputdata[i] = (raw.imgdata.rawdata.raw_image[i]);
-        input_to_mergedata[i] = (raw.imgdata.rawdata.raw_image[i]);
-    }
-    //inputdata += offsetNextImg;
 
     float* bl = new float[4];
     for (size_t i = 0; i < 4; i++)
@@ -143,15 +186,16 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     cfaar[3] = raw.imgdata.idata.cdesc[raw.COLOR(1, 1)];
 
     std::string cfa = cfaar;
-    if (cfa == std::string("BGGR"))
+    LOGD("cfa: %s", cfaar);
+    if (cfaar[0] == 'B')
     {
         dngprofile->bayerformat = "bggr";
     }
-    else if (cfa == std::string("RGGB"))
+    else if(cfaar[0] == 'R')
     {
         dngprofile->bayerformat = "rggb";
     }
-    else if (cfa == std::string("GRBG"))
+    else if(cfaar[0] == 'G' && cfaar[1] == 'R')
     {
         dngprofile->bayerformat = "grbg";
     }
@@ -180,32 +224,53 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
 
     LOGD("data copied");
     raw.recycle();
+    int stackedfile = 0;
 
     //read left dngs and merge them
-    for (int i = 1; i < stringCount; ++i) {
+    for (int i = 0; i < stringCount; i += 5) {
+        for (int t = 0; t < 5; ++t) {
+            if ((ret = raw.open_file(files[i+t]) != LIBRAW_SUCCESS))
+                return;
+            if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
+                return;
+            LOGD("open %i", i+t);
 
-        if ((ret = raw.open_file(files[i]) != LIBRAW_SUCCESS))
-            return;
-        if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
-            return;
-        LOGD("open %i", i);
-        int off = offsetNextImg;
-        for (size_t t = 0; t <  offsetNextImg; t++)
-        {
-            inputdata[t+ off] = raw.imgdata.rawdata.raw_image[t];
-            input_to_mergedata[t+ off] = raw.imgdata.rawdata.raw_image[t];
+            for (size_t b = 0; b <  offsetNextImg; b++)
+            {
+                inputdata[b*t] = raw.imgdata.rawdata.raw_image[b];
+            }
+            LOGD("input filled", i);
+            raw.recycle();
         }
-        raw.recycle();
-
-        LOGD("end copy algin to alignout");
-        LOGD("start merge");
-        stage1_alignmerge(input,input_to_merge,output);
-        LOGD("end merge");
-        for (size_t t = 0; t <  offsetNextImg; t++)
+        LOGD("start stack");
+        stage1_align_merge(input,output);
+        LOGD("end stack");
+        if(stacktostackfilecount > 1)
         {
-            input_to_mergedata[t] = out[t];
+            const char * sfile = stacktostackfiles[stackedfile++];
+            LOGD("write tmp file %s", sfile);
+            writeBinaryFile(out,offsetNextImg,sfile);
+            LOGD("write tmp file done");
         }
+    }
 
+    if(stacktostackfilecount > 1)
+    {
+        LOGD("create new input");
+        Halide::Runtime::Buffer<uint16_t> tmp(width, height, stacktostackfilecount);
+        input = tmp;
+        inputdata = input.data();
+        LOGD("load frames for new input");
+        for (int i = 0; i < stacktostackfilecount; ++i) {
+            uint16_t * in = readBinaryFile(stacktostackfiles[i]);
+            for (size_t b = 0; b <  offsetNextImg; b++)
+            {
+                inputdata[b*i] = in[b];
+            }
+            inputdata += offsetNextImg;
+            free(in);
+        }
+        stage1_align_merge(input,output);
     }
 
     unsigned char *data1 = (unsigned char *)out;
