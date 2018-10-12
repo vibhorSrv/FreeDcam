@@ -20,7 +20,7 @@
 
 extern "C"
 {
-JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile, jobjectArray tmpfiles);
+JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile, jint bufsize, jint minoffset,jint maxoffset, jint l1mindistance, jint l1maxdistance);
 }
 
 
@@ -107,27 +107,23 @@ uint16_t * readBinaryFile(const char *name, int size)
 }
 
 
-JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile, jobjectArray tmpfiles)
+JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject thiz, jobjectArray filesToStack, jstring outputfile, jint bufsize, jint minoffset,jint maxoffset, jint l1mindistance, jint l1maxdistance)
 {
 
+    int buffsize = bufsize;
     int stringCount = (*env).GetArrayLength(filesToStack);
+    if(stringCount < buffsize)
+        buffsize = stringCount;
     int width,height, outputcount;
     const char * files[stringCount];
     const char * outfile =(*env).GetStringUTFChars( outputfile, NULL);
-    int stacktostackfilecount = (*env).GetArrayLength(tmpfiles);
-    const char * stacktostackfiles[stacktostackfilecount];
+    int stacktostackfilecount = stringCount/buffsize;
 
     LOGD("FilesToReadCount: %i", stringCount);
     for (int i=0; i<stringCount; i++) {
         jstring string = (jstring) (*env).GetObjectArrayElement(filesToStack, i);
         files[i] = (*env).GetStringUTFChars( string, NULL);
     }
-
-    for (int i=0; i<stacktostackfilecount; i++) {
-        jstring string = (jstring) (*env).GetObjectArrayElement(tmpfiles, i);
-        stacktostackfiles[i] = (*env).GetStringUTFChars( string, NULL);
-    }
-
 
     LOGD("init libraw");
     LibRaw raw;
@@ -154,7 +150,7 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     height = (int)raw.imgdata.sizes.raw_height;
     DngProfile * dngprofile =new DngProfile();
     CustomMatrix * matrix = new CustomMatrix();
-    Halide::Runtime::Buffer<uint16_t> input(width, height, 5);
+    Halide::Runtime::Buffer<uint16_t> input(width, height, buffsize);
 
     Halide::Runtime::Buffer<uint16_t> output(width, height, 1);
 
@@ -235,9 +231,9 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     int stackedfile = 0;
 
     //read left dngs and merge them
-    for (int i = 0; i < stringCount; i += 5) {
+    for (int i = 0; i < stringCount; i += buffsize) {
         int off = 0;
-        for (int t = 0; t < 5; ++t) {
+        for (int t = 0; t < buffsize; ++t) {
             if ((ret = raw.open_file(files[i+t]) != LIBRAW_SUCCESS))
                 return;
             if ((ret = raw.unpack()) != LIBRAW_SUCCESS)
@@ -250,10 +246,11 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
             }
             LOGD("input filled", i);
             raw.recycle();
+            off += offsetNextImg;
         }
-        off += offsetNextImg;
+
         LOGD("start stack");
-        stage1_align_merge(input,output);
+        stage1_align_merge(input,minoffset,maxoffset,l1mindistance,l1maxdistance,output);
         LOGD("end stack");
         if(stacktostackfilecount > 1)
         {
@@ -269,7 +266,7 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
 
     if(stacktostackfilecount > 1)
     {
-        stage1_align_merge(tmp,output);
+        stage1_align_merge(tmp,minoffset,maxoffset,l1mindistance,l1maxdistance,output);
     }
 
     unsigned char *data1 = (unsigned char *)out;

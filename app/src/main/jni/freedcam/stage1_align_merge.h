@@ -29,7 +29,7 @@ struct buffer_t;
 extern "C" {
 #endif
 
-int stage1_align_merge(struct halide_buffer_t *_p0_buffer, struct halide_buffer_t *_merge_spatial_output_buffer) HALIDE_FUNCTION_ATTRS;
+int stage1_align_merge(struct halide_buffer_t *_p0_buffer, int32_t _p2, int32_t _p3, int32_t _p4, int32_t _p5, struct halide_buffer_t *_merge_spatial_output_buffer) HALIDE_FUNCTION_ATTRS;
 int stage1_align_merge_argv(void **args) HALIDE_FUNCTION_ATTRS;
 const struct halide_filter_metadata_t *stage1_align_merge_metadata() HALIDE_FUNCTION_ATTRS;
 
@@ -52,7 +52,7 @@ inline const struct halide_filter_metadata_t* (*HALIDE_GET_STANDARD_METADATA_FUN
 #endif
 
 
-int stage1_align_merge_old_buffer_t(struct buffer_t *_p0, struct buffer_t *_merge_spatial_output) HALIDE_FUNCTION_ATTRS;
+int stage1_align_merge_old_buffer_t(struct buffer_t *_p0, int32_t _p2, int32_t _p3, int32_t _p4, int32_t _p5, struct buffer_t *_merge_spatial_output) HALIDE_FUNCTION_ATTRS;
 
 #ifdef __cplusplus
 }  // extern "C"

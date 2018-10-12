@@ -358,6 +358,7 @@ public class GridViewFragment extends Fragment implements I_OnActivityResultCall
                 case selection:
                     filesSelectedCount = 0;
                     filesSelected.setVisibility(View.VISIBLE);
+                    filesSelected.bringToFront();
                     updateFilesSelected();
                     switch (requestMode) {
                         case none:

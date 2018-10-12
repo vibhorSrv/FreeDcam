@@ -50,7 +50,7 @@
                 android:layout_marginRight="@dimen/freedviewer_screenslide_topBarItemMargine"
                 android:text="@string/files_selected"
                 android:textAppearance="?android:attr/textAppearanceMedium"
-                android:textColor="@color/abc_background_cache_hint_selector_material_light" />
+                android:textColor="@color/uiSettingsTextColor" />
 
             <Button
                 android:id="@+id/button_filetype"
