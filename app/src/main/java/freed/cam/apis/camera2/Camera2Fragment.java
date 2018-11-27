@@ -25,7 +25,6 @@ import android.graphics.Point;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.HandlerThread;
 import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.SurfaceView;
@@ -41,7 +40,6 @@ import java.util.Collections;
 import java.util.List;
 
 import freed.cam.apis.basecamera.CameraFragmentAbstract;
-import freed.cam.apis.basecamera.MainToCameraHandler;
 import freed.cam.apis.camera2.modules.I_PreviewWrapper;
 import freed.cam.apis.camera2.parameters.ParameterHandlerApi2;
 import freed.renderscript.RenderScriptProcessor;
@@ -133,9 +131,15 @@ public class Camera2Fragment extends CameraFragmentAbstract implements TextureVi
     @Override
     public void onCameraClose(String message)
     {
-        Log.d(TAG, "onCameraClose");
-        cameraIsOpen = false;
-        mProcessor.kill();
+        try {
+            Log.d(TAG, "onCameraClose");
+            cameraIsOpen = false;
+            mProcessor.kill();
+        }
+        catch (NullPointerException ex)
+        {
+            Log.WriteEx(ex);
+        }
     }
 
     @Override
@@ -297,10 +301,16 @@ public class Camera2Fragment extends CameraFragmentAbstract implements TextureVi
 
     @Override
     public void stopCamera() {
-        Log.d(TAG, "Stop Camera");
-        captureSessionHandler.Clear();
-        cameraHolder.CloseCamera();
-        cameraIsOpen = false;
+        try {
+            Log.d(TAG, "Stop Camera");
+            captureSessionHandler.Clear();
+            cameraHolder.CloseCamera();
+            cameraIsOpen = false;
+        }
+        catch (NullPointerException ex)
+        {
+            Log.WriteEx(ex);
+        }
     }
 
     @Override

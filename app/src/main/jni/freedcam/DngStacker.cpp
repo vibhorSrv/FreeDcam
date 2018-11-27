@@ -6,7 +6,6 @@
 #include <stdlib.h>
 #include <android/log.h>
 #include "../tiff/libtiff/tiffio.h"
-#include "DngTags.h"
 #include "libraw.h"
 #include "DngProfile.h"
 #include "CustomMatrix.h"

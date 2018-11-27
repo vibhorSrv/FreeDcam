@@ -28,7 +28,6 @@ import com.troop.freedcam.BuildConfig;
 import com.troop.freedcam.R;
 
 import java.io.File;
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -41,7 +40,6 @@ import freed.dng.CustomMatrix;
 import freed.dng.DngProfile;
 import freed.dng.ToneMapProfile;
 import freed.jni.OpCode;
-import freed.jni.RawToDng;
 import freed.settings.mode.SettingInterface;
 import freed.utils.Log;
 import freed.utils.StringUtils;
@@ -91,7 +89,6 @@ public class SettingsManager implements SettingsManagerInterface {
     public static final String TIMELAPSEFRAME = "timelapseframe";
     public static final String SETTING_API = "sonyapi";
     public static final String SETTING_LOCATION = "location";
-    public static final String SETTING_EXTERNALSHUTTER = "externalShutter";
     public static final String SETTING_TIMER = "timer";
     public static final String SETTING_FOCUSPEAK = "focuspeak";
     public static final String SETTING_EXTERNALSD = "extSD";
@@ -383,6 +380,19 @@ public class SettingsManager implements SettingsManagerInterface {
         editor.putInt("camera2maxiso",max);
         editor.commit();
         Log.d(TAG,"Override max iso:" +settings.getInt("camera2maxiso",0));
+    }
+
+    public void setCamera2MinFocusPosition(float pos)
+    {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putFloat("camera2minfocuspos",pos);
+        editor.commit();
+        Log.d(TAG,"Override min focus position:" +settings.getInt("camera2minfocuspos",0));
+    }
+
+    public float getCamera2MinFocusPosition()
+    {
+        return settings.getInt("camera2minfocuspos",0);
     }
 
     public void setDevice(String device) {

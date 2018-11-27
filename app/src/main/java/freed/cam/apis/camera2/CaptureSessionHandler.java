@@ -577,7 +577,7 @@ public class CaptureSessionHandler
 
     public <T> void SetPreviewParameter(@NonNull CaptureRequest.Key<T> key, T value)
     {
-        if (mPreviewRequestBuilder == null )
+        if (mPreviewRequestBuilder == null || mCaptureSession == null)
             return;
         Log.d(TAG, "Set :" + key.getName() + " to " + value);
         mPreviewRequestBuilder.set(key,value);
@@ -667,6 +667,8 @@ public class CaptureSessionHandler
 
     public void SetTextureViewSize(int w, int h, int rotation, int orientationWithHack,boolean renderscript)
     {
+        if (SettingsManager.get(SettingKeys.orientationHack).get())
+            rotation = orientationWithHack;
         Matrix matrix = new Matrix();
         matrix.reset();
         RectF inputRect = new RectF(0, 0, w, h);
@@ -758,7 +760,7 @@ public class CaptureSessionHandler
 
     public void StartAePrecapture(CameraCaptureSession.CaptureCallback listener)
     {
-        SetParameter(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+        SetPreviewParameter(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
     }
 
     public <T> void SetFocusArea(@NonNull CaptureRequest.Key<T> key, T value)
@@ -790,7 +792,7 @@ public class CaptureSessionHandler
             }
         }
         else {
-            SetPreviewParameter(key, value);
+            SetParameter(key, value);
             if (value != null)
                 SetPreviewParameter(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
         }

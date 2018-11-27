@@ -34,7 +34,6 @@ import freed.cam.apis.basecamera.CameraWrapperInterface;
 import freed.cam.apis.basecamera.parameters.AbstractParameter;
 import freed.cam.apis.basecamera.parameters.AbstractParameterHandler;
 import freed.cam.apis.basecamera.parameters.modes.ApiParameter;
-import freed.cam.apis.basecamera.parameters.modes.ParameterExternalShutter;
 import freed.cam.apis.camera2.Camera2Fragment;
 import freed.cam.apis.sonyremote.SonyCameraRemoteFragment;
 import freed.cam.ui.themesample.AbstractFragment;
@@ -130,6 +129,12 @@ public class LeftMenuFragment extends AbstractFragment  implements SettingsChild
                 SettingsChildMenu videoStabilization = new SettingsChildMenu(getContext(), params.get(SettingKeys.VideoStabilization), R.string.setting_vs_header, R.string.setting_vs_description);
                 videoStabilization.SetUiItemClickListner(this);
                 videoGroup.addView(videoStabilization);
+            }
+            if (params.get(SettingKeys.VIDEO_AUDIO_SOURCE)!= null)
+            {
+                SettingsChildMenu videoaudio = new SettingsChildMenu(getContext(), params.get(SettingKeys.VIDEO_AUDIO_SOURCE), R.string.setting_videoaudiosource_header, R.string.setting_videoaudiosource_description);
+                videoaudio.SetUiItemClickListner(this);
+                videoGroup.addView(videoaudio);
             }
 
             if (videoGroup.childSize() > 0)
@@ -229,10 +234,7 @@ public class LeftMenuFragment extends AbstractFragment  implements SettingsChild
 
         if (cameraUiWrapper != null) {
 
-
-            SettingsChildMenu externalShutter = new SettingsChildMenu(getContext(),R.string.setting_externalshutter_header, R.string.setting_externalshutter_description);
-            externalShutter.SetStuff(fragment_activityInterface, "");
-            externalShutter.SetParameter(new ParameterExternalShutter());
+            SettingsChildMenu externalShutter = new SettingsChildMenu(getContext(),cameraUiWrapper.getParameterHandler().get(SettingKeys.EXTERNAL_SHUTTER), R.string.setting_externalshutter_header, R.string.setting_externalshutter_description);
             externalShutter.SetUiItemClickListner(this);
             globalSettingGroup.addView(externalShutter);
 
