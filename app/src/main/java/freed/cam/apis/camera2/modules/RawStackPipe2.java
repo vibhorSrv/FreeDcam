@@ -124,6 +124,8 @@ public class RawStackPipe2 extends PictureModuleApi2 {
                         else
                             dngProfile.matrixes = SettingsManager.getInstance().getMatrixesMap().get(SettingsManager.get(SettingKeys.MATRIX_SET).get());
 
+                        if(dngProfile.matrixes == null)
+                            dngProfile.matrixes = currentCaptureHolder.getMatrix();
 
                         rawStack.setShift(upshift);
                         rawStack.setFirstFrame(input, dngProfile.getWidth(), dngProfile.getHeight());
