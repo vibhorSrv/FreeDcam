@@ -220,6 +220,9 @@ JNIEXPORT void JNICALL Java_freed_jni_DngStack_startStack(JNIEnv *env, jobject t
     copyMatrix(matrix->colorMatrix1, raw.imgdata.color.dng_color[0].colormatrix);
     copyMatrix(matrix->colorMatrix2, raw.imgdata.color.dng_color[1].colormatrix);
     copyMatrix(matrix->neutralColorMatrix, raw.imgdata.color.cam_mul);
+    matrix->neutralColorMatrix[0] = 1 /matrix->neutralColorMatrix[0];
+    matrix->neutralColorMatrix[1] = 1 /matrix->neutralColorMatrix[1];
+    matrix->neutralColorMatrix[2] = 1 /matrix->neutralColorMatrix[2];
     copyMatrix(matrix->fowardMatrix1, raw.imgdata.color.dng_color[0].forwardmatrix);
     copyMatrix(matrix->fowardMatrix2, raw.imgdata.color.dng_color[1].forwardmatrix);
     copyMatrix(matrix->reductionMatrix1, raw.imgdata.color.dng_color[0].calibration);
