@@ -740,6 +740,7 @@ void DngWriter::WriteDNG() {
     LOGD("TIFFCheckpointDirectory");
     TIFFCheckpointDirectory(tif);
     TIFFWriteDirectory(tif);
+    TIFFSetDirectory(tif, 0);
     
 
     if(gpsInfo != NULL)
