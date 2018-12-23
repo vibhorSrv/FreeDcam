@@ -1,1 +1,1 @@
-include ':halide_generator',':app'
+include ':halide_generator','halide_aot',':app'

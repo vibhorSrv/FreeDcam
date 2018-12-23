@@ -15,7 +15,7 @@ gradle.projectsEvaluated { project ->
 }
 
 gradle.buildFinished {
-    logger.quiet("buildFinished of $project ")
+    logger.quiet("buildFinished ")
 }
 
 tasks.build.doLast(){

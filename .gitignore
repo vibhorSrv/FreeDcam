@@ -28,3 +28,6 @@ app/build.gradle
 *.apk
 app/release
 /halide_generator/libs/*
+/halide_aot/libs/
+/halide_aot/stage1_align_merge.a
+/halide_aot/stage1_align_merge.h
