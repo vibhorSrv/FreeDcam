@@ -2,7 +2,6 @@
 #include "JniUtils.h"
 #include <stdlib.h>
 #include "RawStackPipeNative.h"
-#include "HalideBuffer.h"
 #include "CustomMatrix.h"
 #include "DngProfile.h"
 

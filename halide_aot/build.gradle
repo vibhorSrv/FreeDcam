@@ -1,18 +1,6 @@
 apply plugin: "cpp"
 
-def halide_dir = "M:/halide/halide_win64_150218"
-
-
-task copyHalideLib(type: Copy) {
-    //dependsOn build
-    logger.quiet("copyHalideLib from ${halide_dir}/Release/Halide.dll to ${buildDir}/exe/halide_generator/")
-    from file("${halide_dir}/Release/Halide.dll")
-    into file("${buildDir}/exe/halide_aot")
-}
-
-
-
-
+def halide_dir = findProperty('halideDir')
 
 model{
 
@@ -35,44 +23,49 @@ model{
                     source {
                         srcDirs "src/","src/hdrplus/", "${halide_dir}/tools/", "${halide_dir}/include/"
                         include "Main.cpp", "align.cpp","merge.cpp","util.cpp","align.h","merge.h"
-                        /*exportedHeaders {
-                            srcDirs  "${halide_dir}/include"
-                        }*/
                     }
                 }
             }
             binaries{
                 all {
-                    cppCompiler.args "-std=c++11", "-g", "-Wall", "-fno-rtti", "/I${halide_dir}/include/"
+                    cppCompiler.args "/I${halide_dir}/include/"
                     // "/bin" assumes Makefile build for Halide; "/build/lib" assumes CMake build
-                    linker.args "-lHalide", "-ldl", "-lpthread", "-lz", "/clr" ,"/MT", "/MACHINE:x86_64", "/SUBSYSTEM:CONSOLE", "${halide_dir}/Release/Halide.lib", "/LIBPATH:${halide_dir}/Release/Halide.dll"
+                    linker.args "/MACHINE:x86_64", "${halide_dir}/Release/Halide.lib", "/LIBPATH:${halide_dir}/Release/Halide.dll"
                     logger.quiet("binaries all")
+
                 }
             }
 
             //hook into clean and delete libs too
             clean{
-                delete "$project.projectDir/libs"
-                delete "$project.projectDir/stage1_align_merge.a"
-                delete "$project.projectDir/stage1_align_merge.h"
+                //delete "$projectDir/../app/libs"
+                delete "$projectDir/stage1_align_merge.a"
+                delete "$projectDir/stage1_align_merge.h"
             }
 
-            task buildX32 {
-                dependsOn build
-                doLast {
-                    String envVars = "${buildDir}/exe/halide_aot/halide_aot.exe -x 32"
-                    ProcessBuilder processBuilder = new ProcessBuilder()
-                    processBuilder.command(envVars.split(' '))
-                    logger.quiet("Output of running " + envVars + " is: ")
-                    Process process = processBuilder.start()
-                    process.waitFor()
+            task copyHeader(type: Copy) {
+                    from "$projectDir/stage1_align_merge.h"
+                    into "${projectDir}/../app/src/main/jni/include"
 
-                    mkdir("${projectDir}/libs/armeabi-v7a")
-                }
+            }
+
+            task copyX89_64(type: Copy){
+
+                    logger.quiet("copyX64")
+                    from "$projectDir/stage1_align_merge.a"
+                    into "$projectDir/../app/libs/x86_64"
+                finalizedBy copyHeader
+            }
+            task copyX64(type: Copy){
+
+                    logger.quiet("copyX64")
+                    from "$projectDir/stage1_align_merge.a"
+                    into "$projectDir/../app/libs/arm64-v8a"
+                finalizedBy copyX89_64
             }
 
             task buildX64 {
-                dependsOn build
+
                 doLast {
                     String envVars = "${buildDir}/exe/halide_aot/halide_aot.exe -x 64"
                     ProcessBuilder processBuilder = new ProcessBuilder()
@@ -81,42 +74,89 @@ model{
                     Process process = processBuilder.start()
                     process.waitFor()
 
-                    mkdir("${projectDir}/libs/arm64-v8a")
                 }
+                finalizedBy copyX64
             }
 
-            task copyX32(type:Copy){
-                dependsOn buildX32
+
+            task copyX86(type: Copy){
+
+
+                    logger.quiet("copyX86")
+
+
+                    from "$projectDir/stage1_align_merge.a"
+                    into "$projectDir/../app/libs/x86"
+
+                finalizedBy buildX64
+            }
+
+            task copyX32(type: Copy){
+
+
                     logger.quiet("copyX32")
-                    from "$projectDir/stage1_align_merge.a","$projectDir/stage1_align_merge.h"
-                    into "$projectDir/libs/armeabi-v7a"
+                    from "$projectDir/stage1_align_merge.a"
+                    into "$projectDir/../app/libs/armeabi-v7a"
+
+                    /*from "$projectDir/stage1_align_merge.a"
+                    into "$projectDir/../app/libs/x86"
+
+                    from "$projectDir/stage1_align_merge.a"
+                    into "$projectDir/../app/libs/x86_64"*/
+                finalizedBy copyX86
+            }
+
+            task buildX32 {
+
+                doLast {
+                    String envVars = "${buildDir}/exe/halide_aot/halide_aot.exe"
+                    ProcessBuilder processBuilder = new ProcessBuilder()
+                    processBuilder.command(envVars.split(' '))
+                    logger.quiet("Output of running " + envVars + " is: ")
+                    Process process = processBuilder.start()
+                    process.waitFor()
+                }
+                finalizedBy copyX32
+            }
+
+            task copyHalideHeader(type: Copy) {
+                finalizedBy buildX32
+
+                    logger.quiet("copyHalideHeaders from ${halide_dir}/include to ${projectDir}/../app/libs/inlcude/")
+                    from "${halide_dir}/include/HalideRuntime.h", "${halide_dir}/include/HalideBuffer.h"
+                    into "${projectDir}/../app/src/main/jni/include"
 
             }
 
-            task copyX64(type:Copy){
-                dependsOn buildX64
-                    logger.quiet("copyX64")
-                    from "$projectDir/stage1_align_merge.a","$projectDir/stage1_align_merge.h"
-                    into "$projectDir/libs/arm64-v8a"
+            task copyHalideLib(type: Copy) {
+                finalizedBy copyHalideHeader
+
+                    logger.quiet("copyHalideLib from ${halide_dir}/Release/Halide.dll to ${buildDir}/exe/halide_generator/")
+                    from "${halide_dir}/Release/Halide.dll"
+                    into "${buildDir}/exe/halide_aot"
+
             }
 
             //hook into build
             build{
+
                 //the compiler runs after doFirst and calls doLast
                 doFirst {
                     logger.quiet("build.doFirst")
                 }
-                //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
-                dependsOn copyHalideLib
 
                 doLast{
                     logger.quiet("build.doLast")
+                    //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
+                    /*copyHalideLib.execute()
+                    copyHalideHeader.execute()
                     buildX32.execute()
                     copyX32.execute()
+                    copyHeader.execute()
                     buildX64.execute()
-                    copyX64.execute()
+                    copyX64.execute()*/
                 }
-
+                finalizedBy(copyHalideLib)
             }
         }
     }

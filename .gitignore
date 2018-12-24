@@ -31,3 +31,5 @@ app/release
 /halide_aot/libs/
 /halide_aot/stage1_align_merge.a
 /halide_aot/stage1_align_merge.h
+/app/libs/
+/app/src/main/jni/include/

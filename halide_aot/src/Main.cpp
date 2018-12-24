@@ -2,6 +2,9 @@
 #include "Halide.h"
 #include "hdrplus/align.h"
 #include "hdrplus/merge.h"
+#include <stdlib.h>
+#include <cstdio>
+#include <string>
 
 //#include "finish.h"
 using namespace Halide;
@@ -21,18 +24,13 @@ Func align_merge(ImageParam imgs, Param<int> minoffset, Param<int> maxoffset, Pa
 int main(int argc, char* argv[]) {
 
     int xOs = 32;
-    int i = 0;
 
-    while(argv[i][0] == '-') {
+    if(argc > 1)
+        xOs = 64;
 
-        if(argv[i][1] == 'x') {
 
-            xOs = atof(argv[++i]);
-            i++;
-            continue;
-        }
-    }
-	
+
+    std::cout << xOs <<std::endl;
 	ImageParam imgs(type_of<uint16_t>(), 3);
 	ImageParam alignImgs(type_of<uint16_t>(), 3);
 	Param<int> minoffset;

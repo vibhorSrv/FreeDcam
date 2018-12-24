@@ -11,8 +11,9 @@
 #include "CustomMatrix.h"
 #include "DngWriter.h"
 #include <string>
-#include "stage1_align_merge.h"
-#include "HalideBuffer.h"
+
+#include "../include/stage1_align_merge.h"
+#include "../include/HalideBuffer.h"
 
 #define  LOG_TAG    "freedcam.DngStack"
 #define  LOGD(...)  __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)

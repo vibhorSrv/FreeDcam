@@ -4,11 +4,12 @@
 #include "stage2_RawToRgb.h"
 #include "stage1_alignmerge.h"
 
-#include "HalideBuffer.h"
+
 #include "DngProfile.h"
 #include "CustomMatrix.h"
 #include "DngWriter.h"
 #include "OpCode.h"
+#include "../include/HalideBuffer.h"
 #include <jni.h>
 #include <stdlib.h>
 #include <android/log.h>

@@ -9,7 +9,9 @@ include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := align_merge
-LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/stage1_align_merge.a
+LOCAL_SRC_FILES := ../../../../libs/$(TARGET_ARCH_ABI)/stage1_align_merge.a
+LOCAL_C_INCLUDES += include/
+LOCAL_CPP_INCLUDES += include/
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
@@ -32,6 +34,9 @@ LOCAL_LDLIBS := -lz \
 	-landroid
 LOCAL_C_INCLUDES += \
 					$(NDK_APP_PROJECT_PATH)/tiff/libtiff/ \
+					include/
+
+LOCAL_CPP_INCLUDES += include/
 
 LOCAL_STATIC_LIBRARIES := libtiff libraw alignmerge align_merge rawtorgb
 include $(BUILD_SHARED_LIBRARY)

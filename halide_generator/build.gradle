@@ -1,6 +1,6 @@
 apply plugin: "cpp"
 
-def halide_dir = "M:/halide/halide_win64_150218"
+def halide_dir = findProperty('halideDir')
 
 gradle.afterProject { project ->
     if (project.state.failure) {
@@ -20,15 +20,9 @@ gradle.buildFinished {
 
 tasks.build.doLast(){
     logger.quiet( 'tasks.build.doLast This will be printed after the build task even if something else calls the build task')
-    //halide_generator.startHalideGenerators
 }
 
-task copyHalideLib(type: Copy) {
-    //dependsOn build
-    logger.quiet("copyHalideLib from ${halide_dir}/Release/Halide.dll to ${buildDir}/exe/halide_generator/")
-    from file("${halide_dir}/Release/Halide.dll")
-    into file("${buildDir}/exe/halide_generator")
-}
+
 
 model{
 
@@ -49,17 +43,14 @@ model{
                     source {
                         srcDirs "generator/", "${halide_dir}/tools/", "${halide_dir}/include/"
                         include "hello_generator.cpp", "GenGen.cpp"
-                        /*exportedHeaders {
-                            srcDirs  "${halide_dir}/include"
-                        }*/
                     }
                 }
             }
             binaries{
                 all {
-                    cppCompiler.args "-std=c++11", "-g", "-Wall", "-fno-rtti", "/I${halide_dir}/include/"
+                    cppCompiler.args "/I${halide_dir}/include/"
                     // "/bin" assumes Makefile build for Halide; "/build/lib" assumes CMake build
-                    linker.args "-lHalide", "-ldl", "-lpthread", "-lz", "/clr" ,"/MT", "/MACHINE:x86_64", "/SUBSYSTEM:CONSOLE", "${halide_dir}/Release/Halide.lib", "/LIBPATH:${halide_dir}/Release/Halide.dll"
+                    linker.args "${halide_dir}/Release/Halide.lib", "/LIBPATH:${halide_dir}/Release/Halide.dll"
                     logger.quiet("binaries all")
                 }
             }
@@ -69,18 +60,24 @@ model{
                 delete "$project.projectDir/libs"
             }
 
+            task copyHalideLib(type: Copy) {
+                logger.quiet("copyHalideLib from ${halide_dir}/Release/Halide.dll to ${buildDir}/exe/halide_generator/")
+                from file("${halide_dir}/Release/Halide.dll")
+                into file("${buildDir}/exe/halide_generator")
+            }
+
             //hook into build
             build{
                 //the compiler runs after doFirst and calls doLast
                 doFirst {
                     logger.quiet("build.doFirst")
                 }
-                //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
-                dependsOn copyHalideLib
+
                 //our exe is now ready lets start the generator
                 doLast{
                     logger.quiet("build.doLast")
-
+                    //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
+                    copyHalideLib.execute()
                     //define abis
                     Map<String, String> archs = [
                             // armeabi and armeabi-v7a are the same as far as Halide is concerned
