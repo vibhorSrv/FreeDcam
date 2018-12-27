@@ -4,19 +4,23 @@ LOCAL_ARM_MODE := arm
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := alignmerge
-LOCAL_SRC_FILES := $(TARGET_ARCH_ABI)/stage1_alignmerge.a
+LOCAL_SRC_FILES := $(LOCAL_PATH)/../../../../libs/$(TARGET_ARCH_ABI)/stage1_alignmerge.a
+LOCAL_C_INCLUDES += include/
+LOCAL_CPP_INCLUDES += include/
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := align_merge
-LOCAL_SRC_FILES := ../../../../libs/$(TARGET_ARCH_ABI)/stage1_align_merge.a
+LOCAL_SRC_FILES := $(LOCAL_PATH)/../../../../libs/$(TARGET_ARCH_ABI)/stage1_align_merge.a
 LOCAL_C_INCLUDES += include/
 LOCAL_CPP_INCLUDES += include/
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)
 LOCAL_MODULE    := rawtorgb
-LOCAL_SRC_FILES :=  $(TARGET_ARCH_ABI)/stage2_RawToRgb.a
+LOCAL_SRC_FILES :=  $(LOCAL_PATH)/../../../../libs/$(TARGET_ARCH_ABI)/stage2_RawToRgb.a
+LOCAL_C_INCLUDES += include/
+LOCAL_CPP_INCLUDES += include/
 include $(PREBUILT_STATIC_LIBRARY)
 
 include $(CLEAR_VARS)

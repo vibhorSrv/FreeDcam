@@ -66,12 +66,12 @@ extern "C"
     }
 
     JNIEXPORT void JNICALL Java_freed_jni_RawStack_writeJpeg(JNIEnv *env, jobject thiz, jobject javaHandler, jobject dngprofile, jobject matrix,jstring fileout, jobject exifinfo) {
-        RawStackPipeNative * rawStackPipeNative = (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);
+       /* RawStackPipeNative * rawStackPipeNative = (RawStackPipeNative*)env->GetDirectBufferAddress(javaHandler);
         DngProfile * profile = (DngProfile*)env->GetDirectBufferAddress(dngprofile);
         CustomMatrix * cmatrix = (CustomMatrix*)env->GetDirectBufferAddress(matrix);
         ExifInfo * exifInfo = (ExifInfo*)env->GetDirectBufferAddress(exifinfo);
         char * outfile = copyString(env,fileout);
-        rawStackPipeNative->writeJpeg(profile, cmatrix, outfile,exifInfo);
+        rawStackPipeNative->writeJpeg(profile, cmatrix, outfile,exifInfo);*/
     }
 
 };

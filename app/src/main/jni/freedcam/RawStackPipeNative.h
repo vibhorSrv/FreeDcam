@@ -1,8 +1,6 @@
 //
 // Created by troop on 21.06.2018.
 //
-#include "stage2_RawToRgb.h"
-#include "stage1_alignmerge.h"
 
 
 #include "DngProfile.h"
@@ -10,6 +8,8 @@
 #include "DngWriter.h"
 #include "OpCode.h"
 #include "../include/HalideBuffer.h"
+#include "../include/stage1_alignmerge.h"
+#include "../include/stage2_RawToRgb.h"
 #include <jni.h>
 #include <stdlib.h>
 #include <android/log.h>
@@ -35,7 +35,7 @@ public:
     int height;
     int offset;
     OpCode * opCode =NULL;
-    int upshift = 0;
+    int upshift = 0,minoffset = -64, maxoffset = 64,l1mindistance=4,l1maxdistance = 128;
 
     int bl = 0;
 
@@ -130,6 +130,7 @@ public:
         LOGD("copy data");
         for (int i = 0; i < offset; ++i) {
             if(upshift > 0) {
+
                 inputdata[i] = ((firstdata[i]) << upshift) + bl;
                 mergedata[i] = ((firstdata[i]) << upshift) + bl;
             } else
@@ -154,11 +155,10 @@ public:
                 mergedata[i + offset] = ((nextdata[i]) << upshift);
             }
         }
-        stage1_alignmerge(input,input_to_merge,output);
+        stage1_alignmerge(input,input_to_merge,minoffset, maxoffset,l1mindistance,l1maxdistance,output);
         for (int i = 0; i < offset; ++i) {
             mergedata[i] = outdata[i];
         }
-        //delete[] nextdata;
         LOGD("stackframedone");
     }
 

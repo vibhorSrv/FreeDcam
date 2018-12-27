@@ -3,7 +3,7 @@
 //
 #include <jni.h>
 #include <string.h>
-#include "stage1_alignmerge.h"
+
 #ifndef FREEDCAM_JNIUTILS_H
 #define FREEDCAM_JNIUTILS_H
 

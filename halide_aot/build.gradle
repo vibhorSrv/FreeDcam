@@ -18,13 +18,14 @@ model{
     components{
 
         halide_aot(NativeExecutableSpec) {
+
             //targetPlatform "x86"
             targetPlatform "x64"
             sources {
                 cpp {
                     source {
                         srcDirs "src/","src/hdrplus/", "${halide_dir}/tools/", "${halide_dir}/include/"
-                        include "Main.cpp", "align.cpp","merge.cpp","util.cpp","align.h","merge.h"
+                        include "Main.cpp", "align.cpp","merge.cpp","util.cpp","finish.cpp"
                     }
                 }
             }
@@ -47,28 +48,36 @@ model{
             //hook into clean and delete libs too
             clean{
                 //delete "$projectDir/../app/libs"
-                delete "$projectDir/stage1_align_merge.a"
-                delete "$projectDir/stage1_align_merge.h"
+                delete fileTree("$projectDir").matching {
+                    include "*.a"
+                    include "*.h"
+                }
+                delete fileTree("${projectDir}/../app/src/main/jni/include").matching {
+                    include "*.h"
+                }
+                /*delete "$projectDir/stage1_align_merge.a"
+                delete "$projectDir/stage1_align_merge.h"*/
             }
 
             task copyHeader(type: Copy) {
-                    from "$projectDir/stage1_align_merge.h"
-                    into "${projectDir}/../app/src/main/jni/include"
-
+                from "$projectDir"
+                include "*.h"
+                into "${projectDir}/../app/src/main/jni/include"
             }
 
             task copyX86_64(type: Copy){
-
-                    logger.quiet("copyX64")
-                    from "$projectDir/stage1_align_merge.a"
-                    into "$projectDir/../app/libs/x86_64"
+                logger.quiet("copyX64")
+                from "$projectDir"
+                include "*.a"
+                into "$projectDir/../app/libs/x86_64"
                 finalizedBy copyHeader
             }
             task copyX64(type: Copy){
 
-                    logger.quiet("copyX64")
-                    from "$projectDir/stage1_align_merge.a"
-                    into "$projectDir/../app/libs/arm64-v8a"
+                logger.quiet("copyX64")
+                from "$projectDir"
+                include "*.a"
+                into "$projectDir/../app/libs/arm64-v8a"
                 finalizedBy copyX86_64
             }
 
@@ -96,14 +105,16 @@ model{
 
             task copyX86(type: Copy){
                 logger.quiet("copyX86")
-                from "$projectDir/stage1_align_merge.a"
+                from "$projectDir"
+                include "*.a"
                 into "$projectDir/../app/libs/x86"
                 finalizedBy buildX64
             }
 
             task copyX32(type: Copy){
                 logger.quiet("copyX32")
-                from "$projectDir/stage1_align_merge.a"
+                from "$projectDir"
+                include "*.a"
                 into "$projectDir/../app/libs/armeabi-v7a"
                 finalizedBy copyX86
             }
@@ -129,11 +140,9 @@ model{
 
             task copyHalideHeader(type: Copy) {
                 finalizedBy buildX32
-
-                    logger.quiet("copyHalideHeaders from ${halide_dir}/include to ${projectDir}/../app/libs/inlcude/")
-                    from "${halide_dir}/include/HalideRuntime.h", "${halide_dir}/include/HalideBuffer.h"
-                    into "${projectDir}/../app/src/main/jni/include"
-
+                logger.quiet("copyHalideHeaders from ${halide_dir}/include to ${projectDir}/../app/libs/inlcude/")
+                from "${halide_dir}/include/HalideRuntime.h", "${halide_dir}/include/HalideBuffer.h"
+                into "${projectDir}/../app/src/main/jni/include"
             }
 
             task copyHalideLib(type: Copy) {

@@ -2,6 +2,7 @@
 #include "Halide.h"
 #include "hdrplus/align.h"
 #include "hdrplus/merge.h"
+#include "hdrplus/finish.h"
 #include <stdlib.h>
 #include <cstdio>
 #include <string>
@@ -50,7 +51,7 @@ int main(int argc, char* argv[]) {
 	target.set_features(arm_features);
 
 	//Func alignment = align(imgs);
-	Func stage1_alignmerge = align_merge(imgs,minoffset, maxoffset,l1mindistance,l1maxdistance);
+	Func stage1_align_merge = align_merge(imgs,minoffset, maxoffset,l1mindistance,l1maxdistance);
 	std::vector<Argument> argss(5);
 	argss[0] = imgs;
 	argss[1] = minoffset;
@@ -59,12 +60,22 @@ int main(int argc, char* argv[]) {
 	argss[4] = l1maxdistance;
 
 
-	stage1_alignmerge.compile_to_static_library("stage1_align_merge", {  argss }, "stage1_align_merge", target);
+	stage1_align_merge.compile_to_static_library("stage1_align_merge", {  argss }, "stage1_align_merge", target);
+
+    Func stage1_alignmerge = alignmerge(imgs, alignImgs,minoffset, maxoffset,l1mindistance,l1maxdistance);
+    std::vector<Argument> args(6);
+    args[0] = imgs;
+    args[1] = alignImgs;
+    args[2] = minoffset;
+    args[3] = maxoffset;
+    args[4] = l1mindistance;
+    args[5] = l1maxdistance;
+    stage1_alignmerge.compile_to_static_library("stage1_alignmerge", {  args }, "stage1_alignmerge", target);
 
 	//target.bits = 32;
 	//stage1_alignmerge.compile_to_static_library("../../../libs/armeabi-v7a", {  argss }, "stage1_align_merge", target);
 
-	/*ImageParam input(type_of<uint16_t>(), 2);
+	ImageParam input2(type_of<uint16_t>(), 2);
 	Param<int> blackpoint;
 	Param<int> whitepoint;
 	Param<float> wb_r;
@@ -74,19 +85,19 @@ int main(int argc, char* argv[]) {
 	Param<float> compression;
 	Param<float> gain;
 
-	Func stage2_RawToRgb = finish(input, blackpoint, whitepoint, wb_r,wb_g1,wb_g2,wb_b, compression, gain);
-	std::vector<Argument> args(9);
-	args[0] = input;
-	args[1] = blackpoint;
-	args[2] = whitepoint;
-	args[3] = wb_r;
-	args[4] = wb_g1;
-	args[5] = wb_g2;
-	args[6] = wb_b;
-	args[7] = compression;
-	args[8] = gain;
+	Func stage2_RawToRgb = finish(input2, blackpoint, whitepoint, wb_r,wb_g1,wb_g2,wb_b, compression, gain);
+	std::vector<Argument> args2(9);
+	args2[0] = input2;
+	args2[1] = blackpoint;
+	args2[2] = whitepoint;
+	args2[3] = wb_r;
+	args2[4] = wb_g1;
+	args2[5] = wb_g2;
+	args2[6] = wb_b;
+	args2[7] = compression;
+	args2[8] = gain;
 
-	stage2_RawToRgb.compile_to_static_library("stage2_RawToRgb", { args }, "stage2_RawToRgb", target);*/
+	stage2_RawToRgb.compile_to_static_library("stage2_RawToRgb", { args2 }, "stage2_RawToRgb", target);
 
 	return 0;
 }
