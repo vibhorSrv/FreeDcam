@@ -1,3 +1,5 @@
+import org.apache.tools.ant.taskdefs.condition.Os
+
 apply plugin: "cpp"
 
 def halide_dir = findProperty('halideDir')
@@ -28,10 +30,16 @@ model{
             }
             binaries{
                 all {
-                    cppCompiler.args "/I${halide_dir}/include/"
-                    // "/bin" assumes Makefile build for Halide; "/build/lib" assumes CMake build
-                    linker.args "/MACHINE:x86_64", "${halide_dir}/Release/Halide.lib", "/LIBPATH:${halide_dir}/Release/Halide.dll"
-                    logger.quiet("binaries all")
+                    if (toolChain in VisualCpp) {
+                        cppCompiler.args "/I${halide_dir}/include/"
+                        // "/bin" assumes Makefile build for Halide; "/build/lib" assumes CMake build
+                        linker.args "${halide_dir}/Release/Halide.lib", "/LIBPATH:${halide_dir}/Release/Halide.dll"
+                        logger.quiet("binaries all")
+                    }
+                    else
+                    {
+                        logger.quiet("binaries.all Error the compiler not implemented")
+                    }
 
                 }
             }
@@ -49,7 +57,7 @@ model{
 
             }
 
-            task copyX89_64(type: Copy){
+            task copyX86_64(type: Copy){
 
                     logger.quiet("copyX64")
                     from "$projectDir/stage1_align_merge.a"
@@ -61,13 +69,20 @@ model{
                     logger.quiet("copyX64")
                     from "$projectDir/stage1_align_merge.a"
                     into "$projectDir/../app/libs/arm64-v8a"
-                finalizedBy copyX89_64
+                finalizedBy copyX86_64
             }
 
             task buildX64 {
 
                 doLast {
-                    String envVars = "${buildDir}/exe/halide_aot/halide_aot.exe -x 64"
+                    String envVars
+                    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                        envVars = "${buildDir}/exe/halide_aot/halide_aot.exe -x 64"
+                    }
+                    else
+                    {
+                        logger.quiet("Error BuildX64, your os is not added")
+                    }
                     ProcessBuilder processBuilder = new ProcessBuilder()
                     processBuilder.command(envVars.split(' '))
                     logger.quiet("Output of running " + envVars + " is: ")
@@ -80,36 +95,29 @@ model{
 
 
             task copyX86(type: Copy){
-
-
-                    logger.quiet("copyX86")
-
-
-                    from "$projectDir/stage1_align_merge.a"
-                    into "$projectDir/../app/libs/x86"
-
+                logger.quiet("copyX86")
+                from "$projectDir/stage1_align_merge.a"
+                into "$projectDir/../app/libs/x86"
                 finalizedBy buildX64
             }
 
             task copyX32(type: Copy){
-
-
-                    logger.quiet("copyX32")
-                    from "$projectDir/stage1_align_merge.a"
-                    into "$projectDir/../app/libs/armeabi-v7a"
-
-                    /*from "$projectDir/stage1_align_merge.a"
-                    into "$projectDir/../app/libs/x86"
-
-                    from "$projectDir/stage1_align_merge.a"
-                    into "$projectDir/../app/libs/x86_64"*/
+                logger.quiet("copyX32")
+                from "$projectDir/stage1_align_merge.a"
+                into "$projectDir/../app/libs/armeabi-v7a"
                 finalizedBy copyX86
             }
 
             task buildX32 {
-
                 doLast {
-                    String envVars = "${buildDir}/exe/halide_aot/halide_aot.exe"
+                    String envVars
+                    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+                        envVars = "${buildDir}/exe/halide_aot/halide_aot.exe"
+                    }
+                    else
+                    {
+                        logger.quiet("Error BuildX32, your os is not added")
+                    }
                     ProcessBuilder processBuilder = new ProcessBuilder()
                     processBuilder.command(envVars.split(' '))
                     logger.quiet("Output of running " + envVars + " is: ")
@@ -147,14 +155,6 @@ model{
 
                 doLast{
                     logger.quiet("build.doLast")
-                    //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
-                    /*copyHalideLib.execute()
-                    copyHalideHeader.execute()
-                    buildX32.execute()
-                    copyX32.execute()
-                    copyHeader.execute()
-                    buildX64.execute()
-                    copyX64.execute()*/
                 }
                 finalizedBy(copyHalideLib)
             }

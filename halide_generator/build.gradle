@@ -68,6 +68,8 @@ model{
 
             //hook into build
             build{
+                //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
+                dependsOn copyHalideLib
                 //the compiler runs after doFirst and calls doLast
                 doFirst {
                     logger.quiet("build.doFirst")
@@ -76,8 +78,7 @@ model{
                 //our exe is now ready lets start the generator
                 doLast{
                     logger.quiet("build.doLast")
-                    //on windows its needed, if halide is not in the %PATH, to copy the halide.dll to the exe to run the generator
-                    copyHalideLib.execute()
+
                     //define abis
                     Map<String, String> archs = [
                             // armeabi and armeabi-v7a are the same as far as Halide is concerned
