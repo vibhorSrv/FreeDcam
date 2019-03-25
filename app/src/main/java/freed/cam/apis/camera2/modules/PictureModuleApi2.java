@@ -443,7 +443,7 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
         prepareCaptureBuilder(BurstCounter.getImageCaptured());
         changeCaptureState(CaptureStates.image_capture_start);
         Log.d(TAG, "StartStillCapture");
-        //cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
+        cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
         cameraUiWrapper.captureSessionHandler.StartImageCapture(currentCaptureHolder, mBackgroundHandler);
     }
 
