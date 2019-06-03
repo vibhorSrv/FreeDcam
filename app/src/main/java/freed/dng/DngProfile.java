@@ -67,6 +67,20 @@ public class DngProfile
         this.matrixes = matrixes;
     }
 
+    public void setWhiteLevel(int whiteLevel)
+    {
+        if (byteBuffer == null)
+            return;
+        setWhitelvl(byteBuffer, whiteLevel);
+    }
+
+    public void setBlackLevel(int blackLevel)
+    {
+        if (byteBuffer == null)
+            return;
+        setBlacklvl(byteBuffer, blackLevel);
+    }
+
 
     public static DngProfile getProfile(int blacklevel,int whitelevel, int widht, int height,int rawFormat, String bayerPattern, int rowsize, float[] matrix1, float[] matrix2, float[] neutral, float[] fmatrix1, float[] fmatrix2, float[] rmatrix1, float[] rmatrix2, double[] noise, String name)
     {
@@ -117,6 +131,8 @@ public class DngProfile
     private native void setDngInfo(ByteBuffer javaHandler, int blacklevel,int whitelevel,int widht, int height, int rawType, String bayerPattern, int rowsize);
     private native int getWhitelvl(ByteBuffer byteBuffer);
     private native int getBlacklvl(ByteBuffer byteBuffer);
+    private native void setWhitelvl(ByteBuffer byteBuffer, int wlvl);
+    private native void setBlacklvl(ByteBuffer byteBuffer, int blvl);
     private native int getRawType(ByteBuffer byteBuffer);
     private native int getWidth(ByteBuffer byteBuffer);
     private native int getHeight(ByteBuffer byteBuffer);

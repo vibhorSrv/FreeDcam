@@ -35,7 +35,7 @@ public:
     int height;
     int offset;
     OpCode * opCode =NULL;
-    int upshift = 0,minoffset = -64, maxoffset = 64,l1mindistance=4,l1maxdistance = 128;
+    int upshift = 0,minoffset = -32, maxoffset = 32,l1mindistance=4,l1maxdistance = 128;
 
     int bl = 0;
 

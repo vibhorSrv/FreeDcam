@@ -114,10 +114,17 @@ public class RawStackPipe2 extends PictureModuleApi2 {
                             upshift = 0;
 
                         DngProfile dngProfile;
-                        if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(input.length) != null)
+                        if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(input.length) != null) {
                             dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(input.length);
+                            if (upshift > 0)
+                            {
+                                dngProfile.setBlackLevel(dngProfile.getBlacklvl() << upshift);
+                                dngProfile.setWhiteLevel(dngProfile.getWhitelvl() << upshift);
+                            }
+                        }
                         else
                             dngProfile = currentCaptureHolder.getDngProfile(upshift);
+
 
                         if (SettingsManager.get(SettingKeys.MATRIX_SET).get() == null ||SettingsManager.get(SettingKeys.MATRIX_SET).get().equals(SettingsManager.getInstance().getResString(R.string.off_)))
                             dngProfile.matrixes = currentCaptureHolder.getMatrix();

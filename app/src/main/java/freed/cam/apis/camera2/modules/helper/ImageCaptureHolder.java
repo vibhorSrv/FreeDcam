@@ -184,8 +184,8 @@ public class ImageCaptureHolder extends CameraCaptureSession.CaptureCallback imp
         Log.d(TAG, "OnRawAvailible, in buffer: " + images.size());
         try {
             img = reader.acquireLatestImage();
-            witdh = img.getWidth();
-            height = img.getHeight();
+            witdh = reader.getWidth();
+            height = reader.getHeight();
             if (isJpgCapture && img.getFormat() == ImageFormat.JPEG) {
                 AddImage(img);
                 Log.d(TAG,"Add Jpeg");

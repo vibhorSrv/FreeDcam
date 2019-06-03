@@ -17,7 +17,7 @@ public class DngStack
         System.loadLibrary("freedcam");
     }
 
-    private static native void startStack(String[] filesToStack,String outputFile, int buffersize, int minoffset,int maxoffset, int l1mindistance, int l1maxdistance);
+    private static native void startStack(String outputFile,String[] filesToStack, int buffersize, int minoffset,int maxoffset, int l1mindistance, int l1maxdistance);
 
     private final String[] dngToStack;
 
@@ -31,7 +31,7 @@ public class DngStack
         File file = new File(dngToStack[0]);
         File out = file.getParentFile();
         out = new File(out.getAbsolutePath() + "/" + file.getName() + "_Stack.dng");
-        startStack(dngToStack , out.getAbsolutePath(),bufsize, minoffset,maxoffset,l1mindistance,l1maxdistance);
+        startStack(out.getAbsolutePath(),dngToStack , bufsize, minoffset,maxoffset,l1mindistance,l1maxdistance);
         MediaScannerManager.ScanMedia(context,out);
     }
 }

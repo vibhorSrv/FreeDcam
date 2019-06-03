@@ -126,15 +126,13 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
                     Log.WriteEx(e);
                 }
                 final ByteBuffer buffer = image.getPlanes()[0].getBuffer();
-                final int w = image.getWidth();
-                final int h = image.getHeight();
+               /* final int w = image.getWidth();
+                final int h = image.getHeight();*/
 
                 Log.d(TAG, "stackframes");
                 if (stackCoutn == 0) {
-
-                    rawStack.setFirstFrame(buffer, w, h);
+                    rawStack.setFirstFrame(buffer, width, height);
                     rawsize = buffer.remaining();
-
                 } else
                     rawStack.stackNextFrame(buffer);
 
@@ -160,8 +158,14 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     {
         if (SettingsManager.get(SettingKeys.forceRawToDng).get()) {
             DngProfile dngProfile;
-            if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null)
+            if (SettingsManager.get(SettingKeys.useCustomMatrixOnCamera2).get() && SettingsManager.getInstance().getDngProfilesMap().get(rawsize) != null) {
                 dngProfile = SettingsManager.getInstance().getDngProfilesMap().get(rawsize);
+                if (upshift > 0)
+                {
+                    dngProfile.setBlackLevel(dngProfile.getBlacklvl() << upshift);
+                    dngProfile.setWhiteLevel(dngProfile.getWhitelvl() << upshift);
+                }
+            }
             else
                 dngProfile = getDngProfile(DngProfile.Plain, width, height, upshift);
 
