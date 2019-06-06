@@ -14,6 +14,7 @@ import freed.cam.apis.basecamera.CameraWrapperInterface;
 import freed.cam.apis.basecamera.modules.ModuleHandlerAbstract;
 import freed.cam.apis.basecamera.parameters.AbstractParameter;
 import freed.cam.apis.basecamera.parameters.modes.ToneMapChooser;
+import freed.cam.apis.camera2.modules.helper.CaptureType;
 import freed.cam.apis.camera2.modules.helper.ImageCaptureHolder;
 import freed.cam.apis.camera2.modules.helper.RawStackCaptureHolder;
 import freed.settings.SettingKeys;
@@ -50,7 +51,7 @@ public class RawStackPipe extends PictureModuleApi2 {
 
     @Override
     protected void TakePicture() {
-        rawStackCaptureHolder = new RawStackCaptureHolder(cameraHolder.characteristics, true, false, cameraUiWrapper.getActivityInterface(),this,this, this);
+        rawStackCaptureHolder = new RawStackCaptureHolder(cameraHolder.characteristics, CaptureType.Bayer16, cameraUiWrapper.getActivityInterface(),this,this, this);
         rawStackCaptureHolder.setFilePath(getFileString(), SettingsManager.getInstance().GetWriteExternal());
         rawStackCaptureHolder.setForceRawToDng(SettingsManager.get(SettingKeys.forceRawToDng).get());
         rawStackCaptureHolder.setToneMapProfile(((ToneMapChooser)cameraUiWrapper.getParameterHandler().get(SettingKeys.TONEMAP_SET)).getToneMap());

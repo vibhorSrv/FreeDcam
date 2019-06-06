@@ -51,8 +51,8 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
     private int upshift = 0;
 
 
-    public RawStackCaptureHolder(CameraCharacteristics characteristicss, boolean isRawCapture, boolean isJpgCapture, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
-        super(characteristicss, isRawCapture, isJpgCapture, activitiy, imageSaver, finish, rdyToSaveImg);
+    public RawStackCaptureHolder(CameraCharacteristics characteristicss, CaptureType captureType, ActivityInterface activitiy, ModuleInterface imageSaver, WorkFinishEvents finish, RdyToSaveImg rdyToSaveImg) {
+        super(characteristicss, captureType, activitiy, imageSaver, finish, rdyToSaveImg);
         imageBlockingQueue = new LinkedBlockingQueue<>(4);
 
         rawStack =new RawStack();
