@@ -16,17 +16,19 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/textView10"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
             android:text="Stack Queue:  "
-            android:id="@+id/textView10" />
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:textColor="#000000" />
 
         <TextView
+            android:id="@+id/rawList"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge"
-            android:id="@+id/rawList" />
+            android:textColor="#000000" />
     </LinearLayout>
 
     <LinearLayout
@@ -40,14 +42,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Buffer Size:"
-            android:textColor="@android:color/black" />
+            android:textColor="#000000" />
 
         <EditText
             android:id="@+id/editText_buffersize"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="numberSigned" />
+            android:inputType="numberSigned"
+            android:textColor="#000000" />
     </LinearLayout>
 
     <LinearLayout
@@ -61,14 +64,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Min Search Offset:"
-            android:textColor="@android:color/black" />
+            android:textColor="#000000" />
 
         <EditText
             android:id="@+id/editText_minoffset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="numberSigned" />
+            android:inputType="numberSigned"
+            android:textColor="#000000" />
     </LinearLayout>
 
     <LinearLayout
@@ -82,14 +86,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Max Search Offset:"
-            android:textColor="@android:color/black" />
+            android:textColor="#000000" />
 
         <EditText
             android:id="@+id/editText_maxoffset"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="numberSigned" />
+            android:inputType="numberSigned"
+            android:textColor="#000000" />
     </LinearLayout>
 
     <LinearLayout
@@ -103,14 +108,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Min L1 Distance:"
-            android:textColor="@android:color/black" />
+            android:textColor="#000000" />
 
         <EditText
             android:id="@+id/editText_minl1distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="numberSigned" />
+            android:inputType="numberSigned"
+            android:textColor="#000000" />
     </LinearLayout>
 
     <LinearLayout
@@ -124,14 +130,15 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Max L1 Distance:"
-            android:textColor="@android:color/black" />
+            android:textColor="#000000" />
 
         <EditText
             android:id="@+id/editText_maxl1distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="numberSigned" />
+            android:inputType="numberSigned"
+            android:textColor="#000000" />
     </LinearLayout>
 
     <Button
