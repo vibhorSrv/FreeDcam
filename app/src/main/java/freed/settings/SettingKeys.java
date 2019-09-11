@@ -150,6 +150,7 @@ public class SettingKeys{
     public final static Key<SettingMode> CLIPPING = new Key(SettingMode.class, R.string.aps_histogram);
 
     public final static Key<SettingMode> lastPictureFormat = new Key(SettingMode.class, R.string.aps_lastpicformat);
+    public final static Key<SettingMode> ApiSettingsMode = new Key(SettingMode.class, R.string.aps_api);
 
     /**
      *
