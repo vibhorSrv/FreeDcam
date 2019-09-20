@@ -761,6 +761,7 @@ public class CaptureSessionHandler
 
     public <T> void SetFocusArea(@NonNull CaptureRequest.Key<T> key, T value)
     {
+        handler.post(()->{
         //SetParameter(key,null);
         /*captureSessionHandler.SetParameter(CaptureRequest.CONTROL_AF_TRIGGER,CameraMetadata.CONTROL_AF_TRIGGER_CANCEL);*/
         if (value != null)
@@ -796,6 +797,7 @@ public class CaptureSessionHandler
                 SetPreviewParameter(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_START);
             SetPreviewParameterRepeating(CaptureRequest.CONTROL_AF_TRIGGER, CameraMetadata.CONTROL_AF_TRIGGER_IDLE,true);
         }
+        });
     }
 
 }
