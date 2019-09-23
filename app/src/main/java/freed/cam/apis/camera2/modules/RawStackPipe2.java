@@ -35,7 +35,7 @@ public class RawStackPipe2 extends PictureModuleApi2 {
 
     public RawStackPipe2(CameraWrapperInterface cameraUiWrapper, Handler mBackgroundHandler, Handler mainHandler) {
         super(cameraUiWrapper, mBackgroundHandler, mainHandler);
-        name = cameraUiWrapper.getResString(R.string.module_stacking2);
+        name = cameraUiWrapper.getActivityInterface().getStringFromRessources(R.string.module_stacking2);
         tmpFolder = cameraUiWrapper.getActivityInterface().getStorageHandler().getFreedcamFolder()+"/tmp/";
         File tmp = new File(tmpFolder);
         if (!tmp.exists())

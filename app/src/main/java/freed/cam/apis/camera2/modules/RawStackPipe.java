@@ -29,7 +29,7 @@ public class RawStackPipe extends PictureModuleApi2 {
     private RawStackCaptureHolder rawStackCaptureHolder;
     public RawStackPipe(CameraWrapperInterface cameraUiWrapper, Handler mBackgroundHandler, Handler mainHandler) {
         super(cameraUiWrapper, mBackgroundHandler, mainHandler);
-        name = cameraUiWrapper.getResString(R.string.module_stacking);
+        name = cameraUiWrapper.getActivityInterface().getStringFromRessources(R.string.module_stacking);
     }
 
     @Override

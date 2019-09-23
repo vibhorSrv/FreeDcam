@@ -13,6 +13,7 @@ import com.troop.freedcam.R;
 import freed.ActivityAbstract;
 import freed.jni.DngStack;
 import freed.utils.LocationManager;
+import freed.utils.PermissionManager;
 import freed.viewer.dngconvert.DngConvertingFragment;
 import freed.viewer.holder.FileHolder;
 
@@ -31,6 +32,8 @@ public class DngStackActivity extends ActivityAbstract
     private EditText l1maxdist;
     private ProgressBar progressBar;
     private Thread thread;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,6 +99,16 @@ public class DngStackActivity extends ActivityAbstract
     @Override
     public LocationManager getLocationManager() {
         return null;
+    }
+
+    @Override
+    public String getStringFromRessources(int id) {
+        return null;
+    }
+
+    @Override
+    protected void setContentToView() {
+
     }
 
     @Override

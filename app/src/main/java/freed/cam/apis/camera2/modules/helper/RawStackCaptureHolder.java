@@ -11,6 +11,7 @@ import android.hardware.camera2.TotalCaptureResult;
 import android.media.Image;
 import android.media.ImageReader;
 import android.os.Build;
+import android.os.Process;
 import android.util.Size;
 
 import java.io.FileOutputStream;
@@ -58,7 +59,8 @@ public class RawStackCaptureHolder extends ImageCaptureHolder {
         rawStack =new RawStack();
         stackCoutn = 0;
         stackRunner = new StackRunner();
-        new Thread(stackRunner).start();
+        Thread worker = new Thread(stackRunner);
+        worker.start();
         //use freedcam dng converter
         if (SettingsManager.get(SettingKeys.forceRawToDng).get())
         {
