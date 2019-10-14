@@ -398,6 +398,7 @@ public class VideoProfileEditorFragment extends Fragment {
                 videoMediaProfiles.put(p.ProfileName, p);
             }
             SettingsManager.getInstance().saveMediaProfiles(videoMediaProfiles);
+            SettingsManager.getInstance().save();
             videoMediaProfiles.clear();
             Toast.makeText(getContext(),"Profile Saved", Toast.LENGTH_SHORT).show();
         }
