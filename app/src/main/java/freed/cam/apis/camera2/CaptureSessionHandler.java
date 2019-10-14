@@ -14,19 +14,18 @@ import android.hardware.camera2.CameraMetadata;
 import android.hardware.camera2.CaptureRequest;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.support.annotation.RequiresApi;
 import android.view.Display;
 import android.view.Surface;
 import android.view.WindowManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 
 import com.huawei.camera2ex.CaptureRequestEx;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import freed.cam.apis.basecamera.CameraObjects;
 import freed.cam.ui.themesample.handler.UserMessageHandler;
 import freed.settings.Frameworks;
 import freed.settings.SettingKeys;
@@ -102,7 +101,7 @@ public class CaptureSessionHandler
         }
 
         @Override
-        public void onReady(@NonNull CameraCaptureSession session) {
+        public void onReady( CameraCaptureSession session) {
             super.onReady(session);
             captureSessionRdy = true;
             Log.d(TAG, "onReady()");
@@ -113,7 +112,7 @@ public class CaptureSessionHandler
         }
 
         @Override
-        public void onClosed(@NonNull CameraCaptureSession session) {
+        public void onClosed( CameraCaptureSession session) {
             captureSessionRdy = false;
             super.onClosed(session);
             Log.d(TAG, "onClosed()");
@@ -125,14 +124,14 @@ public class CaptureSessionHandler
         }
 
         @Override
-        public void onActive(@NonNull CameraCaptureSession session) {
+        public void onActive( CameraCaptureSession session) {
             captureSessionRdy = false;
             super.onActive(session);
             Log.d(TAG, "onActive()");
         }
 
         @Override
-        public void onSurfacePrepared(@NonNull CameraCaptureSession session, @NonNull Surface surface) {
+        public void onSurfacePrepared( CameraCaptureSession session,  Surface surface) {
             super.onSurfacePrepared(session, surface);
             Log.d(TAG,"onSurfacePrepared");
         }
@@ -472,7 +471,7 @@ public class CaptureSessionHandler
         }
     }
 
-    public void StartImageCapture(@Nullable CameraCaptureSession.CaptureCallback listener, Handler handler)
+    public void StartImageCapture(CameraCaptureSession.CaptureCallback listener, Handler handler)
     {
         Log.d(TAG,"StartImageCapture");
         try {
@@ -539,7 +538,7 @@ public class CaptureSessionHandler
 
     }
 
-    public <T> void SetParameterRepeating(@NonNull CaptureRequest.Key<T> key, T value, boolean setToCamera)
+    public <T> void SetParameterRepeating( CaptureRequest.Key<T> key, T value, boolean setToCamera)
     {
         if (key != null && value != null)
             Log.d(TAG," SetParameterRepeating(" + key.getName() + " " + value+")");
@@ -557,9 +556,9 @@ public class CaptureSessionHandler
         }
     }
 
-    public <T> void SetPreviewParameterRepeating(@NonNull CaptureRequest.Key<T> key, T value, boolean apply)
+    public <T> void SetPreviewParameterRepeating( CaptureRequest.Key<T> key, T value, boolean apply)
     {
-        Log.d(TAG,"SetPreviewParameterRepeating(@NonNull CaptureRequest.Key<T> key, T value, boolean apply)");
+        Log.d(TAG,"SetPreviewParameterRepeating( CaptureRequest.Key<T> key, T value, boolean apply)");
         if (mPreviewRequestBuilder == null )
             return;
         Log.d(TAG, "Set :" + key.getName() + " to " + value);
@@ -572,7 +571,7 @@ public class CaptureSessionHandler
         }
     }
 
-    public <T> void SetPreviewParameter(@NonNull CaptureRequest.Key<T> key, T value)
+    public <T> void SetPreviewParameter( CaptureRequest.Key<T> key, T value)
     {
         if (mPreviewRequestBuilder == null || mCaptureSession == null)
             return;
@@ -599,7 +598,7 @@ public class CaptureSessionHandler
     }
 
 
-    public <T> void SetParameterRepeating(@NonNull CaptureRequest.Key<T> key, T value, CameraCaptureSession.CaptureCallback captureCallback)
+    public <T> void SetParameterRepeating( CaptureRequest.Key<T> key, T value, CameraCaptureSession.CaptureCallback captureCallback)
     {
         if (mPreviewRequestBuilder == null )
             return;
@@ -610,7 +609,7 @@ public class CaptureSessionHandler
         StartRepeatingCaptureSession(captureCallback);
     }
 
-    public <T> void SetParameter(@NonNull CaptureRequest.Key<T> key, T value)
+    public <T> void SetParameter( CaptureRequest.Key<T> key, T value)
     {
         if (mPreviewRequestBuilder == null|| mCaptureSession == null)
             return;
@@ -638,7 +637,7 @@ public class CaptureSessionHandler
         }
     }
 
-    public <T> void SetCaptureParameter(@NonNull CaptureRequest.Key<T> key, T value)
+    public <T> void SetCaptureParameter( CaptureRequest.Key<T> key, T value)
     {
         if (mImageCaptureRequestBuilder == null|| mCaptureSession == null)
             return;
@@ -761,7 +760,7 @@ public class CaptureSessionHandler
         SetPreviewParameter(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
     }
 
-    public <T> void SetFocusArea(@NonNull CaptureRequest.Key<T> key, T value)
+    public <T> void SetFocusArea( CaptureRequest.Key<T> key, T value)
     {
         handler.post(()->{
         //SetParameter(key,null);

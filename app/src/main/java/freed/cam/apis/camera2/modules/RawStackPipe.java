@@ -3,8 +3,9 @@ package freed.cam.apis.camera2.modules;
 import android.hardware.camera2.CaptureRequest;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
 import android.text.TextUtils;
+
+import androidx.annotation.RequiresApi;
 
 import com.troop.freedcam.R;
 

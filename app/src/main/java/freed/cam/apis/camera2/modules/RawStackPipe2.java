@@ -1,21 +1,19 @@
 package freed.cam.apis.camera2.modules;
 
-import android.hardware.camera2.CaptureRequest;
 import android.os.Build;
 import android.os.Handler;
-import android.support.annotation.RequiresApi;
+
+
+import androidx.annotation.RequiresApi;
 
 import com.troop.freedcam.R;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.MappedByteBuffer;
 
 import freed.cam.apis.basecamera.CameraWrapperInterface;
-import freed.cam.apis.basecamera.modules.ModuleHandlerAbstract;
 import freed.cam.apis.basecamera.parameters.AbstractParameter;
 import freed.cam.apis.camera2.modules.helper.ImageCaptureHolder;
-import freed.cam.apis.camera2.parameters.ae.AeManagerCamera2;
 import freed.cam.ui.themesample.handler.UserMessageHandler;
 import freed.dng.DngProfile;
 import freed.jni.ExifInfo;
@@ -24,8 +22,6 @@ import freed.jni.RawToDng;
 import freed.settings.SettingKeys;
 import freed.settings.SettingsManager;
 import freed.utils.Log;
-import freed.utils.StorageFileManager;
-import freed.utils.StringUtils;
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public class RawStackPipe2 extends PictureModuleApi2 {
