@@ -109,7 +109,7 @@ public abstract class ActivityAbstract extends PermissionActivity implements Act
         initDone = true;
         Log.d(TAG, "initOnCreate()");
         if (!SettingsManager.getInstance().isInit()) {
-           SettingsManager.getInstance().init(PreferenceManager.getDefaultSharedPreferences(getBaseContext()), getBaseContext().getResources());
+           SettingsManager.getInstance().init(getBaseContext().getResources());
         }
     }
 
@@ -143,7 +143,7 @@ public abstract class ActivityAbstract extends PermissionActivity implements Act
     @Override
     public void onResumePermissionGranted() {
         if (!SettingsManager.getInstance().isInit()) {
-            SettingsManager.getInstance().init(PreferenceManager.getDefaultSharedPreferences(getBaseContext()), getBaseContext().getResources());
+            SettingsManager.getInstance().init(getBaseContext().getResources());
         }
     }
 

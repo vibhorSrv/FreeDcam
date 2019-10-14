@@ -146,7 +146,7 @@ public class VideoProfileEditorFragment extends Fragment {
 
         if (!SettingsManager.getInstance().isInit()){
 
-            SettingsManager.getInstance().init(PreferenceManager.getDefaultSharedPreferences(getActivity().getBaseContext()), getResources());
+            SettingsManager.getInstance().init(getResources());
         }
         SettingsManager.getInstance().getCamApi();
         videoMediaProfiles = SettingsManager.getInstance().getMediaProfiles();

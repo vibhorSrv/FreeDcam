@@ -155,7 +155,7 @@ public class SettingsManager implements SettingsManagerInterface {
         return key.getType().cast(settingsmap.get(key));
     }
 
-    public synchronized void init(SharedPreferences sharedPreferences, Resources resources)
+    public synchronized void init(Resources resources)
     {
         //check if its not already init while a other task waited for it
         if (isInit)
