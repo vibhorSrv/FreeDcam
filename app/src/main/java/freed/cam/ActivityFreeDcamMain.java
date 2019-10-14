@@ -85,7 +85,7 @@ public class ActivityFreeDcamMain extends ActivityAbstract
     private class UpdateScreenSlide
     {
         public UpdateScreenSlide()
-        {};
+        {}
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
