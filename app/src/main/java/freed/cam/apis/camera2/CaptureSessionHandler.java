@@ -758,6 +758,7 @@ public class CaptureSessionHandler
     public void StartAePrecapture(CameraCaptureSession.CaptureCallback listener)
     {
         SetPreviewParameter(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_START);
+        SetPreviewParameter(CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER, CaptureRequest.CONTROL_AE_PRECAPTURE_TRIGGER_IDLE);
     }
 
     public <T> void SetFocusArea(@NonNull CaptureRequest.Key<T> key, T value)
