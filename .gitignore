@@ -35,3 +35,4 @@ app/release
 /app/src/main/jni/include/
 /halide_aot/*.a
 /halide_aot/*.h
+/app/.cxx/
