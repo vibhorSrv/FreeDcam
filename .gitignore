@@ -36,3 +36,4 @@ app/release
 /halide_aot/*.a
 /halide_aot/*.h
 /app/.cxx/
+/gradle.properties
