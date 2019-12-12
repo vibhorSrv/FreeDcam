@@ -27,6 +27,7 @@ import freed.cam.apis.basecamera.CameraWrapperInterface;
 import freed.cam.apis.basecamera.parameters.AbstractParameter;
 import freed.settings.SettingKeys;
 import freed.settings.SettingsManager;
+import freed.utils.Log;
 import freed.utils.PermissionManager;
 
 /**
@@ -37,6 +38,7 @@ import freed.utils.PermissionManager;
 public class GpsParameter extends AbstractParameter
 {
     private final CameraWrapperInterface cameraUiWrapper;
+    private final String TAG = GpsParameter.class.getSimpleName();
 
     private boolean userAcceptedPermission = false;
     private boolean askedForPermission = false;
@@ -73,6 +75,7 @@ public class GpsParameter extends AbstractParameter
     {
         if (cameraUiWrapper.getActivityInterface().getPermissionManager().hasLocationPermission())
         {
+            Log.d(TAG,"Gps perm is granted");
             SettingsManager.get(SettingKeys.LOCATION_MODE).set(valueToSet);
             if (valueToSet.equals(cameraUiWrapper.getActivityInterface().getStringFromRessources(R.string.off_))) {
                 cameraUiWrapper.getActivityInterface().getLocationManager().stopLocationListining();
@@ -85,7 +88,8 @@ public class GpsParameter extends AbstractParameter
         }
         else
         {
-            if (!userAcceptedPermission && !askedForPermission)
+            Log.d(TAG,"Gps perm is not granted, User accepted perm " + userAcceptedPermission + " user asked for perm " + askedForPermission);
+            if (!userAcceptedPermission && !askedForPermission && valueToSet.equals(cameraUiWrapper.getActivityInterface().getStringFromRessources(R.string.on_)))
                 cameraUiWrapper.getActivityInterface().getPermissionManager().hasLocationPermission(new PermissionManager.PermissionCallback() {
                     @Override
                     public void permissionGranted(boolean granted) {
