@@ -88,7 +88,7 @@ public class CameraHolderApi2 extends CameraHolderAbstract
              }
          } catch (Exception exception) {
              Log.w(TAG, "setOpModeForVideoStream method is not exist");
-             exception.printStackTrace();
+             Log.WriteEx(exception);
          }
      }
 

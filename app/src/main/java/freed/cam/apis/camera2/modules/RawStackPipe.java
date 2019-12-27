@@ -74,7 +74,25 @@ public class RawStackPipe extends PictureModuleApi2 {
         {
             rawReader.setOnImageAvailableListener(rawStackCaptureHolder,mBackgroundHandler);
         }
-        super.TakePicture();
+        isWorking = true;
+        Log.d(TAG, SettingsManager.get(SettingKeys.PictureFormat).get());
+        BurstCounter.resetImagesCaptured();
+        BurstCounter.setBurstCount(Integer.parseInt(parameterHandler.get(SettingKeys.M_Burst).GetStringValue()));
+        if (BurstCounter.getBurstCount() > 1)
+            isBurstCapture = true;
+        else
+            isBurstCapture =false;
+        onStartTakePicture();
+
+        if (SettingsManager.getInstance().hasCamera2Features() && (cameraUiWrapper.captureSessionHandler.getPreviewParameter(CaptureRequest.CONTROL_AE_MODE) != CaptureRequest.CONTROL_AE_MODE_OFF)
+                || cameraUiWrapper.captureSessionHandler.getPreviewParameter(CaptureRequest.CONTROL_AF_MODE) != CaptureRequest.CONTROL_AF_MODE_OFF) {
+            startPreCapture();
+        }
+        else
+        {
+            Log.d(TAG, "captureStillPicture");
+            captureStillPicture();
+        }
     }
 
     @Override
@@ -110,6 +128,7 @@ public class RawStackPipe extends PictureModuleApi2 {
         prepareCaptureBuilder(BurstCounter.getImageCaptured());
         changeCaptureState(ModuleHandlerAbstract.CaptureStates.image_capture_start);
         Log.d(TAG, "StartStillCapture");
+        cameraUiWrapper.captureSessionHandler.StopRepeatingCaptureSession();
         cameraUiWrapper.captureSessionHandler.StartImageCapture(rawStackCaptureHolder, mBackgroundHandler);
     }
 

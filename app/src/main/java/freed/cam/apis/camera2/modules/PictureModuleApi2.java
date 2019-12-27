@@ -78,7 +78,7 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
     private final int MAX_IMAGES = 8;
     protected List<File> filesSaved;
 
-    private boolean isBurstCapture = false;
+    protected boolean isBurstCapture = false;
 
 
     /*private boolean captureDng = false;
@@ -405,7 +405,7 @@ public class PictureModuleApi2 extends AbstractModuleApi2 implements ImageCaptur
                 cameraUiWrapper.captureSessionHandler.getPreviewParameter(CaptureRequest.CONTROL_AF_MODE) == CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_VIDEO;
     }
 
-    private void startPreCapture() {
+    protected void startPreCapture() {
         PictureModuleApi2.this.setCaptureState(STATE_WAIT_FOR_PRECAPTURE);
         cameraUiWrapper.cameraBackroundValuesChangedListner.setWaitForAe_af_lock(new CameraValuesChangedCaptureCallback.WaitForAe_Af_Lock() {
             @Override
