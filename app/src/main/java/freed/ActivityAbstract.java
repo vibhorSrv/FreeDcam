@@ -30,7 +30,6 @@ import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.os.Environment;
 import android.text.TextUtils;
-
 import androidx.documentfile.provider.DocumentFile;
 
 import java.io.File;
@@ -78,16 +77,26 @@ public abstract class ActivityAbstract extends PermissionActivity implements Act
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ImageManager.getInstance(); // init it
-        SettingsManager.getInstance();
+
         Log.d(TAG,"onCreate setContentToView");
 
 
     }
 
     @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        ImageManager.getInstance(); // init it
+        SettingsManager.getInstance();
+    }
+
+    @Override
     public void onCreatePermissionGranted()
     {
+        if (currentState == AppState.Paused || currentState == AppState.Destroyed) {
+            Log.d(TAG, "Wrong AppState" + currentState);
+            return;
+        }
         Log.d(TAG,"onCreatePermissionGranted");
         File log = new File(Environment.getExternalStorageDirectory() +"/DCIM/FreeDcam/log.txt");
         if (!forceLogging) {
@@ -118,6 +127,7 @@ public abstract class ActivityAbstract extends PermissionActivity implements Act
 
     @Override
     protected void onDestroy() {
+
         ImageManager.cancelImageSaveTasks();
         ImageManager.cancelImageLoadTasks();
         SettingsManager.getInstance().release();
