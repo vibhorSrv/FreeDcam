@@ -41,12 +41,25 @@ public class BitmapHelper
     private int mImageThumbSizeW;
     private Context context;
 
+    private static BitmapHelper bitmapHelper;
+
+    public static BitmapHelper GET()
+    {
+        return bitmapHelper;
+    }
+
 
     public BitmapHelper(Context context, int mImageThumbSizeW)
     {
         this.context = context;
         CACHE = new CacheHelper(context);
         this.mImageThumbSizeW = mImageThumbSizeW;
+        bitmapHelper = this;
+    }
+
+    public void clear()
+    {
+        bitmapHelper = null;
     }
 
     public Bitmap getBitmap(final BaseHolder file, boolean thumb)

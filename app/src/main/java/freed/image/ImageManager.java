@@ -136,9 +136,19 @@ public class ImageManager {
 
         public void removeTaskFromQueue(ImageTask task)
         {
+            Log.d(TAG, "removeTaskFromQueue");
             imagesToLoadQueue.remove(task);
-            if (task.getThread() != null && !task.getThread().isInterrupted())
-                task.getThread().interrupt();
+            try {
+                if (task.getThread() != null && !task.getThread().isInterrupted()) {
+                    Log.d(TAG, "interrupt Thread:" + task.getThread().getId());
+                    task.getThread().interrupt();
+                }
+            }
+            catch (NullPointerException ex)
+            {
+                Log.WriteEx(ex);
+            }
+
         }
     }
 

@@ -48,7 +48,7 @@
         android:label="FreeDCam"
         android:supportsRtl="false"
         android:theme="@style/FullscreenTheme"
-        android:hardwareAccelerated="true"
+        android:hardwareAccelerated="false"
         android:largeHeap="true"
         android:extractNativeLibs="true"
         android:usesCleartextTraffic="true">
@@ -143,6 +143,15 @@
         <activity
             android:name="freed.cam.ui.videoprofileeditor.VideoProfileEditorActivity"
             android:label="GridView"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name="freed.gallery.GalleryActivity"
+            android:label="Gallery"
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
